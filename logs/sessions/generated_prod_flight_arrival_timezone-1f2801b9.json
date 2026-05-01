@@ -1,0 +1,130 @@
+{
+  "id": "generated_prod_flight_arrival_timezone-1f2801b9",
+  "scenario_id": "generated_prod_flight_arrival_timezone",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline+candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ]
+  },
+  "started_at": "2026-05-01T16:13:53Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline+candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "Your last flight arrived at 11:35 AM PT."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null,
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "flight",
+        "after": null,
+        "before": null
+      },
+      "result_count": 2,
+      "evidence_ids": [
+        "mail_sfo_flight",
+        "mail_seattle_flight"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null,
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_flight_arrival_timezone",
+    "query": "What time did my last flight arrive?",
+    "answer": "Your last flight arrived at 11:35 AM PT.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ]
+      }
+    ],
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null
+  }
+}

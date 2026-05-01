@@ -1,0 +1,126 @@
+{
+  "id": "heldout_sarah_not_sara-254f74da",
+  "scenario_id": "heldout_sarah_not_sara",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ]
+  },
+  "started_at": "2026-05-01T16:04:46Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "You last met Sarah at Sarah roadmap review on Apr 22."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null,
+        "expected_evidence_ids": [
+          "evt_sarah_before_offsite"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": "sarah@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 2,
+      "evidence_ids": [
+        "evt_sarah_old",
+        "evt_sarah_before_offsite"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null,
+    "expected_evidence_ids": [
+      "evt_sarah_before_offsite"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "heldout_sarah_not_sara",
+    "query": "When did I last meet Sarah?",
+    "answer": "You last met Sarah at Sarah roadmap review on Apr 22.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ]
+      }
+    ],
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null
+  }
+}

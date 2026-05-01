@@ -1,0 +1,144 @@
+{
+  "id": "prod_free_time_alex-27a777f1",
+  "scenario_id": "prod_free_time_alex",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ]
+  },
+  "started_at": "2026-05-01T16:00:24Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-04 10:00:00-04:00",
+          "time_max": "2026-05-09 10:00:00-04:00",
+          "attendee": "alex.rivera@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.free_busy",
+        "args": {
+          "attendee": "alex.rivera@example.com",
+          "start": "2026-05-04 10:00:00-04:00",
+          "end": "2026-05-09 10:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "You and Alex Rivera are free Tuesday at 10:00 AM."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['You and Alex Rivera are free']",
+        "root_cause": "ambiguous_contacts",
+        "expected_evidence_ids": []
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": "2026-05-04 10:00:00-04:00",
+        "time_max": "2026-05-09 10:00:00-04:00",
+        "attendee": "alex.rivera@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.free_busy",
+      "args": {
+        "attendee": "alex.rivera@example.com",
+        "start": "2026-05-04 10:00:00-04:00",
+        "end": "2026-05-09 10:00:00-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['You and Alex Rivera are free']",
+    "root_cause": "ambiguous_contacts",
+    "expected_evidence_ids": []
+  },
+  "final_run": {
+    "scenario_id": "prod_free_time_alex",
+    "query": "Find free time with Alex next week?",
+    "answer": "You and Alex Rivera are free Tuesday at 10:00 AM.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-04 10:00:00-04:00",
+          "time_max": "2026-05-09 10:00:00-04:00",
+          "attendee": "alex.rivera@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.free_busy",
+        "args": {
+          "attendee": "alex.rivera@example.com",
+          "start": "2026-05-04 10:00:00-04:00",
+          "end": "2026-05-09 10:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['You and Alex Rivera are free']",
+    "root_cause": "ambiguous_contacts"
+  }
+}

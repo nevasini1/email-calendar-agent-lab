@@ -1,0 +1,2831 @@
+{
+  "run_at": "2026-05-01T17:57:51Z",
+  "default_eval": {
+    "backend": "langfuse",
+    "json_mirror_enabled": true,
+    "langfuse_export": {
+      "backend": "langfuse",
+      "default_eval_backend": true,
+      "enabled": false,
+      "exported": 0,
+      "json_mirror_enabled": true,
+      "reason": "Langfuse is enabled by default, but LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY are required"
+    }
+  },
+  "production_failure_discovery": {
+    "score": {
+      "passed": 1,
+      "total": 7,
+      "score": 0.143,
+      "by_category": {
+        "cancelled_events": {
+          "passed": 0,
+          "total": 1
+        },
+        "attendees_vs_senders": {
+          "passed": 0,
+          "total": 1
+        },
+        "flight_emails": {
+          "passed": 0,
+          "total": 1
+        },
+        "time_zones": {
+          "passed": 0,
+          "total": 1
+        },
+        "ambiguous_contacts": {
+          "passed": 0,
+          "total": 1
+        },
+        "last_before_anchor": {
+          "passed": 0,
+          "total": 1
+        },
+        "recurring_meetings": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    "runs": [
+      {
+        "scenario_id": "prod_next_meeting",
+        "query": "When is my next meeting?",
+        "answer": "Your next meeting is Recruiting screen at 11:00 AM.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-01 10:00:00-04:00",
+              "time_max": null,
+              "attendee": null,
+              "include_cancelled": true
+            },
+            "result_count": 5,
+            "evidence_ids": [
+              "evt_cancelled_recruiting",
+              "evt_ops_review",
+              "evt_offsite",
+              "evt_alex_1on1",
+              "evt_board_prep"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['Recruiting screen']",
+        "root_cause": "cancelled_events"
+      },
+      {
+        "scenario_id": "prod_last_sync",
+        "query": "Who did I last sync with?",
+        "answer": "You last synced with dana@example.com.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "sync",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sync_dana",
+              "mail_sync_sarah"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['dana@example.com']",
+        "root_cause": "attendees_vs_senders"
+      },
+      {
+        "scenario_id": "prod_last_flight",
+        "query": "Where was my last flight?",
+        "answer": "Your last flight was from JFK.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['JFK']",
+        "root_cause": "flight_emails"
+      },
+      {
+        "scenario_id": "prod_flight_arrival_timezone",
+        "query": "What time did my last flight arrive?",
+        "answer": "Your last flight arrived at 2:35 PM ET.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['2:35 PM ET']",
+        "root_cause": "time_zones"
+      },
+      {
+        "scenario_id": "prod_free_time_alex",
+        "query": "Find free time with Alex next week?",
+        "answer": "You and Alex Rivera are free Tuesday at 10:00 AM.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-04 10:00:00-04:00",
+              "time_max": "2026-05-09 10:00:00-04:00",
+              "attendee": "alex.rivera@example.com",
+              "include_cancelled": false
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          },
+          {
+            "tool": "calendar.free_busy",
+            "args": {
+              "attendee": "alex.rivera@example.com",
+              "start": "2026-05-04 10:00:00-04:00",
+              "end": "2026-05-09 10:00:00-04:00"
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['You and Alex Rivera are free']",
+        "root_cause": "ambiguous_contacts"
+      },
+      {
+        "scenario_id": "prod_sarah_before_offsite",
+        "query": "When did I last meet Sarah before the offsite?",
+        "answer": "You last met Sarah at Leadership offsite on May 2.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": null,
+              "time_max": null,
+              "attendee": "sarah@example.com",
+              "include_cancelled": true
+            },
+            "result_count": 4,
+            "evidence_ids": [
+              "evt_sarah_old",
+              "evt_sarah_before_offsite",
+              "evt_sarah_cancelled",
+              "evt_offsite"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['Leadership offsite on May 2']",
+        "root_cause": "last_before_anchor"
+      },
+      {
+        "scenario_id": "prod_recurring_last_meeting",
+        "query": "What was my last recurring team meeting?",
+        "answer": "Your last recurring team meeting was Team standup on Apr 30.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": "Team standup",
+              "time_min": null,
+              "time_max": "2026-05-01 10:00:00-04:00",
+              "attendee": null,
+              "include_cancelled": false
+            },
+            "result_count": 4,
+            "evidence_ids": [
+              "evt_standup_27",
+              "evt_standup_28",
+              "evt_standup_29",
+              "evt_standup_30"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      }
+    ],
+    "generated_eval_count": 6,
+    "generated_evals": [
+      {
+        "id": "generated_prod_next_meeting",
+        "query": "When is my next meeting?",
+        "expected_contains": [
+          "Ops review",
+          "1:00 PM"
+        ],
+        "category": "cancelled_events",
+        "source_failure": "forbidden answer content present: ['Recruiting screen']",
+        "expected_tools": [
+          "calendar.search_events"
+        ],
+        "expected_evidence_ids": [
+          "evt_ops_review"
+        ],
+        "forbidden_contains": [
+          "Recruiting screen"
+        ],
+        "required_tool_args": {
+          "calendar.search_events": {
+            "include_cancelled": false
+          }
+        },
+        "lifecycle": "candidate",
+        "origin_run_id": "prod_next_meeting",
+        "root_cause": "cancelled_events",
+        "reflection_id": "reflection_e5a7b16bed7f",
+        "lesson_type": "missing_evidence",
+        "promotion_status": "quarantined",
+        "first_seen_at": "2026-05-01T17:57:51Z",
+        "seen_count": 1
+      },
+      {
+        "id": "generated_prod_last_sync",
+        "query": "Who did I last sync with?",
+        "expected_contains": [
+          "Dana Kim"
+        ],
+        "category": "attendees_vs_senders",
+        "source_failure": "forbidden answer content present: ['dana@example.com']",
+        "expected_tools": [
+          "gmail.search_emails"
+        ],
+        "expected_evidence_ids": [
+          "mail_sync_dana"
+        ],
+        "forbidden_contains": [
+          "dana@example.com",
+          "assistant@sarah.example"
+        ],
+        "required_tool_args": {},
+        "lifecycle": "candidate",
+        "origin_run_id": "prod_last_sync",
+        "root_cause": "attendees_vs_senders",
+        "reflection_id": "reflection_4b1aae9d4c96",
+        "lesson_type": "missing_evidence",
+        "promotion_status": "quarantined",
+        "first_seen_at": "2026-05-01T17:57:51Z",
+        "seen_count": 1
+      },
+      {
+        "id": "generated_prod_last_flight",
+        "query": "Where was my last flight?",
+        "expected_contains": [
+          "SFO"
+        ],
+        "category": "flight_emails",
+        "source_failure": "forbidden answer content present: ['JFK']",
+        "expected_tools": [
+          "gmail.search_emails"
+        ],
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "forbidden_contains": [
+          "JFK"
+        ],
+        "required_tool_args": {},
+        "lifecycle": "candidate",
+        "origin_run_id": "prod_last_flight",
+        "root_cause": "flight_emails",
+        "reflection_id": "reflection_f861db65758a",
+        "lesson_type": "missing_evidence",
+        "promotion_status": "quarantined",
+        "first_seen_at": "2026-05-01T17:57:51Z",
+        "seen_count": 1
+      },
+      {
+        "id": "generated_prod_flight_arrival_timezone",
+        "query": "What time did my last flight arrive?",
+        "expected_contains": [
+          "11:35 AM PT"
+        ],
+        "category": "time_zones",
+        "source_failure": "forbidden answer content present: ['2:35 PM ET']",
+        "expected_tools": [
+          "gmail.search_emails"
+        ],
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "forbidden_contains": [
+          "2:35 PM ET"
+        ],
+        "required_tool_args": {},
+        "lifecycle": "candidate",
+        "origin_run_id": "prod_flight_arrival_timezone",
+        "root_cause": "time_zones",
+        "reflection_id": "reflection_cb9b59b93fbe",
+        "lesson_type": "timezone_loss",
+        "promotion_status": "quarantined",
+        "first_seen_at": "2026-05-01T17:57:51Z",
+        "seen_count": 1
+      },
+      {
+        "id": "generated_prod_free_time_alex",
+        "query": "Find free time with Alex next week?",
+        "expected_contains": [
+          "Which Alex",
+          "Alex Chen",
+          "Alex Rivera"
+        ],
+        "category": "ambiguous_contacts",
+        "source_failure": "forbidden answer content present: ['You and Alex Rivera are free']",
+        "expected_tools": [
+          "calendar.free_busy"
+        ],
+        "expected_evidence_ids": [],
+        "forbidden_contains": [
+          "You and Alex Rivera are free"
+        ],
+        "required_tool_args": {},
+        "lifecycle": "candidate",
+        "origin_run_id": "prod_free_time_alex",
+        "root_cause": "ambiguous_contacts",
+        "reflection_id": "reflection_f92c1483f52a",
+        "lesson_type": "ambiguous_contact",
+        "promotion_status": "quarantined",
+        "first_seen_at": "2026-05-01T17:57:51Z",
+        "seen_count": 1
+      },
+      {
+        "id": "generated_prod_sarah_before_offsite",
+        "query": "When did I last meet Sarah before the offsite?",
+        "expected_contains": [
+          "Sarah roadmap review",
+          "Apr 22"
+        ],
+        "category": "last_before_anchor",
+        "source_failure": "forbidden answer content present: ['Leadership offsite on May 2']",
+        "expected_tools": [
+          "calendar.search_events"
+        ],
+        "expected_evidence_ids": [
+          "evt_offsite",
+          "evt_sarah_before_offsite"
+        ],
+        "forbidden_contains": [
+          "Leadership offsite on May 2",
+          "Sarah sync on Apr 30"
+        ],
+        "required_tool_args": {
+          "calendar.search_events": {
+            "include_cancelled": false
+          }
+        },
+        "lifecycle": "candidate",
+        "origin_run_id": "prod_sarah_before_offsite",
+        "root_cause": "last_before_anchor",
+        "reflection_id": "reflection_38c243f36fce",
+        "lesson_type": "bad_temporal_reasoning",
+        "promotion_status": "quarantined",
+        "first_seen_at": "2026-05-01T17:57:51Z",
+        "seen_count": 1
+      }
+    ]
+  },
+  "eval_validation": {
+    "stable.jsonl": 3,
+    "generated.jsonl": 6,
+    "heldout.jsonl": 3
+  },
+  "session_logs": {
+    "count": 43,
+    "paths": [
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_next_meeting-b9edd33e.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_last_sync-3385b706.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_last_flight-d6cb9d05.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_flight_arrival_timezone-3c61d4e7.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_free_time_alex-64bc7eec.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_sarah_before_offsite-409ee89f.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_recurring_last_meeting-1a936b77.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-f1850c25.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-0094c524.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-17ac1dd5.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-8cdaec02.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-a4f5c260.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-0811eaf4.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-7605b1f1.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-e3ab54ed.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-f47c4452.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-603bd27e.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-5ebac5ff.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-6c12a4f2.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-b7fbee7b.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-9f8cbe93.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-37e60051.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-d79c03d1.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-bc19ca11.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-e17676e3.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-edadaa6c.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-343282b6.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-6b73b1ff.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-626f06e5.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-77a02bb6.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-0d508a1b.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-c7ef6c51.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-b8ff36fa.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-6a0ac3f9.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-a6310af4.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-bfc59860.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-c3ef8c3c.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-5fa77aea.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-30de423f.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-d8baa589.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-518f5e86.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-9885660b.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-830d48ad.json"
+    ]
+  },
+  "langfuse_export": {
+    "backend": "langfuse",
+    "default_eval_backend": true,
+    "enabled": false,
+    "exported": 0,
+    "json_mirror_enabled": true,
+    "reason": "Langfuse is enabled by default, but LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY are required"
+  },
+  "reflective_phase": {
+    "count": 43,
+    "generalizable_count": 43,
+    "records": [
+      {
+        "id": "reflection_e5a7b16bed7f",
+        "session_id": "prod_next_meeting-b9edd33e",
+        "scenario_id": "prod_next_meeting",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "cancelled_events",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].",
+        "evidence_ids": [
+          "evt_cancelled_recruiting",
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_4b1aae9d4c96",
+        "session_id": "prod_last_sync-3385b706",
+        "scenario_id": "prod_last_sync",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "attendees_vs_senders",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].",
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_f861db65758a",
+        "session_id": "prod_last_flight-d6cb9d05",
+        "scenario_id": "prod_last_flight",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "flight_emails",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['JFK'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_cb9b59b93fbe",
+        "session_id": "prod_flight_arrival_timezone-3c61d4e7",
+        "scenario_id": "prod_flight_arrival_timezone",
+        "passed": false,
+        "lesson_type": "timezone_loss",
+        "root_cause": "time_zones",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_f92c1483f52a",
+        "session_id": "prod_free_time_alex-64bc7eec",
+        "scenario_id": "prod_free_time_alex",
+        "passed": false,
+        "lesson_type": "ambiguous_contact",
+        "root_cause": "ambiguous_contacts",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.68,
+        "summary": "Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].",
+        "evidence_ids": [],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_38c243f36fce",
+        "session_id": "prod_sarah_before_offsite-409ee89f",
+        "scenario_id": "prod_sarah_before_offsite",
+        "passed": false,
+        "lesson_type": "bad_temporal_reasoning",
+        "root_cause": "last_before_anchor",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].",
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite",
+          "evt_sarah_cancelled",
+          "evt_offsite"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_910bb5c3e3ca",
+        "session_id": "prod_recurring_last_meeting-1a936b77",
+        "scenario_id": "prod_recurring_last_meeting",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_9698cd89bb5d",
+        "session_id": "stable_next_meeting_ignores_cancelled-f1850c25",
+        "scenario_id": "stable_next_meeting_ignores_cancelled",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "cancelled_events",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].",
+        "evidence_ids": [
+          "evt_cancelled_recruiting",
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_7ae731b4bca3",
+        "session_id": "stable_last_flight_destination-0094c524",
+        "scenario_id": "stable_last_flight_destination",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "flight_emails",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['JFK'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_ae10891f82cd",
+        "session_id": "stable_last_sync_human_name-17ac1dd5",
+        "scenario_id": "stable_last_sync_human_name",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "attendees_vs_senders",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].",
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_d5768a6746f6",
+        "session_id": "generated_prod_next_meeting-8cdaec02",
+        "scenario_id": "generated_prod_next_meeting",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "cancelled_events",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].",
+        "evidence_ids": [
+          "evt_cancelled_recruiting",
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_9a0b2377dc59",
+        "session_id": "generated_prod_last_sync-a4f5c260",
+        "scenario_id": "generated_prod_last_sync",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "attendees_vs_senders",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].",
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_24c823d95e89",
+        "session_id": "generated_prod_last_flight-0811eaf4",
+        "scenario_id": "generated_prod_last_flight",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "flight_emails",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['JFK'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_9cb012389686",
+        "session_id": "generated_prod_flight_arrival_timezone-7605b1f1",
+        "scenario_id": "generated_prod_flight_arrival_timezone",
+        "passed": false,
+        "lesson_type": "timezone_loss",
+        "root_cause": "time_zones",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_f348a71d5f76",
+        "session_id": "generated_prod_free_time_alex-e3ab54ed",
+        "scenario_id": "generated_prod_free_time_alex",
+        "passed": false,
+        "lesson_type": "ambiguous_contact",
+        "root_cause": "ambiguous_contacts",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.68,
+        "summary": "Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].",
+        "evidence_ids": [],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_2c6f8b5048e8",
+        "session_id": "generated_prod_sarah_before_offsite-f47c4452",
+        "scenario_id": "generated_prod_sarah_before_offsite",
+        "passed": false,
+        "lesson_type": "bad_temporal_reasoning",
+        "root_cause": "last_before_anchor",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].",
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite",
+          "evt_sarah_cancelled",
+          "evt_offsite"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_12186277b325",
+        "session_id": "heldout_recurring_last_meeting-603bd27e",
+        "scenario_id": "heldout_recurring_last_meeting",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_8266b191ae5c",
+        "session_id": "heldout_timezone_flight-5ebac5ff",
+        "scenario_id": "heldout_timezone_flight",
+        "passed": false,
+        "lesson_type": "timezone_loss",
+        "root_cause": "time_zones",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_7aec2225495d",
+        "session_id": "heldout_sarah_not_sara-6c12a4f2",
+        "scenario_id": "heldout_sarah_not_sara",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_8d0af9d90390",
+        "session_id": "stable_next_meeting_ignores_cancelled-b7fbee7b",
+        "scenario_id": "stable_next_meeting_ignores_cancelled",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "cancelled_events",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].",
+        "evidence_ids": [
+          "evt_cancelled_recruiting",
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_b1268de7d3de",
+        "session_id": "stable_last_flight_destination-9f8cbe93",
+        "scenario_id": "stable_last_flight_destination",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "flight_emails",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['JFK'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_53c62c301ec5",
+        "session_id": "stable_last_sync_human_name-37e60051",
+        "scenario_id": "stable_last_sync_human_name",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "attendees_vs_senders",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].",
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_0d7742acae96",
+        "session_id": "generated_prod_next_meeting-d79c03d1",
+        "scenario_id": "generated_prod_next_meeting",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "cancelled_events",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].",
+        "evidence_ids": [
+          "evt_cancelled_recruiting",
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_90a4e3072b12",
+        "session_id": "generated_prod_last_sync-bc19ca11",
+        "scenario_id": "generated_prod_last_sync",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "attendees_vs_senders",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].",
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_8bbbf7b897bd",
+        "session_id": "generated_prod_last_flight-e17676e3",
+        "scenario_id": "generated_prod_last_flight",
+        "passed": false,
+        "lesson_type": "missing_evidence",
+        "root_cause": "flight_emails",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as missing_evidence: forbidden answer content present: ['JFK'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_0316fc12ecf6",
+        "session_id": "generated_prod_flight_arrival_timezone-edadaa6c",
+        "scenario_id": "generated_prod_flight_arrival_timezone",
+        "passed": false,
+        "lesson_type": "timezone_loss",
+        "root_cause": "time_zones",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_84b96dede955",
+        "session_id": "generated_prod_free_time_alex-343282b6",
+        "scenario_id": "generated_prod_free_time_alex",
+        "passed": false,
+        "lesson_type": "ambiguous_contact",
+        "root_cause": "ambiguous_contacts",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.68,
+        "summary": "Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].",
+        "evidence_ids": [],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_9be0df9481d8",
+        "session_id": "generated_prod_sarah_before_offsite-6b73b1ff",
+        "scenario_id": "generated_prod_sarah_before_offsite",
+        "passed": false,
+        "lesson_type": "bad_temporal_reasoning",
+        "root_cause": "last_before_anchor",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].",
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite",
+          "evt_sarah_cancelled",
+          "evt_offsite"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_4054050235f4",
+        "session_id": "heldout_recurring_last_meeting-626f06e5",
+        "scenario_id": "heldout_recurring_last_meeting",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_c8a624cf3fea",
+        "session_id": "heldout_timezone_flight-77a02bb6",
+        "scenario_id": "heldout_timezone_flight",
+        "passed": false,
+        "lesson_type": "timezone_loss",
+        "root_cause": "time_zones",
+        "generalizes": true,
+        "recommended_artifact": "candidate_eval",
+        "confidence": 0.84,
+        "summary": "Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_35b0546178eb",
+        "session_id": "heldout_sarah_not_sara-0d508a1b",
+        "scenario_id": "heldout_sarah_not_sara",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_761fed6b8775",
+        "session_id": "stable_next_meeting_ignores_cancelled-c7ef6c51",
+        "scenario_id": "stable_next_meeting_ignores_cancelled",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_26548334e595",
+        "session_id": "stable_last_flight_destination-b8ff36fa",
+        "scenario_id": "stable_last_flight_destination",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_5e65b48a7bba",
+        "session_id": "stable_last_sync_human_name-6a0ac3f9",
+        "scenario_id": "stable_last_sync_human_name",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_0612bd65e2b2",
+        "session_id": "generated_prod_next_meeting-a6310af4",
+        "scenario_id": "generated_prod_next_meeting",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_ee681e200b46",
+        "session_id": "generated_prod_last_sync-bfc59860",
+        "scenario_id": "generated_prod_last_sync",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_1e8a70e61838",
+        "session_id": "generated_prod_last_flight-c3ef8c3c",
+        "scenario_id": "generated_prod_last_flight",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_263ff4bcfa7e",
+        "session_id": "generated_prod_flight_arrival_timezone-5fa77aea",
+        "scenario_id": "generated_prod_flight_arrival_timezone",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_db41fe53dd37",
+        "session_id": "generated_prod_free_time_alex-30de423f",
+        "scenario_id": "generated_prod_free_time_alex",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.68,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_65b56874db80",
+        "session_id": "generated_prod_sarah_before_offsite-d8baa589",
+        "scenario_id": "generated_prod_sarah_before_offsite",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_offsite",
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_a4ca4fefefaa",
+        "session_id": "heldout_recurring_last_meeting-518f5e86",
+        "scenario_id": "heldout_recurring_last_meeting",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_2e46c27596b1",
+        "session_id": "heldout_timezone_flight-9885660b",
+        "scenario_id": "heldout_timezone_flight",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      },
+      {
+        "id": "reflection_41f957de332a",
+        "session_id": "heldout_sarah_not_sara-830d48ad",
+        "scenario_id": "heldout_sarah_not_sara",
+        "passed": true,
+        "lesson_type": "useful_success",
+        "root_cause": null,
+        "generalizes": true,
+        "recommended_artifact": "candidate_skill",
+        "confidence": 0.72,
+        "summary": "Successful trace can be distilled as useful_success pattern.",
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ],
+        "langfuse_enabled": false,
+        "created_at": "2026-05-01T17:57:51Z"
+      }
+    ],
+    "langfuse_export": {
+      "backend": "langfuse",
+      "default_eval_backend": true,
+      "enabled": false,
+      "exported": 0,
+      "reason": "Langfuse is enabled by default, but LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY are required"
+    }
+  },
+  "memory": {
+    "path": "/Users/okay/Documents/email-calendar-agent-lab/memory/email_calendar_lab.sqlite",
+    "counts": {
+      "sessions": 258,
+      "reflections": 258,
+      "lessons": 258,
+      "artifact_promotions": 20
+    },
+    "fts_enabled": true
+  },
+  "candidate_skills": [
+    {
+      "id": "candidate_skill_useful_success_prod_recurring_last_meeting",
+      "source_reflection_id": "reflection_910bb5c3e3ca",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to prod_recurring_last_meeting",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "prod_recurring_last_meeting"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_heldout_recurring_last_meeting",
+      "source_reflection_id": "reflection_12186277b325",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to heldout_recurring_last_meeting",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "heldout_recurring_last_meeting"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_heldout_sarah_not_sara",
+      "source_reflection_id": "reflection_7aec2225495d",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to heldout_sarah_not_sara",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "heldout_sarah_not_sara"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_stable_next_meeting_ignores_cancelled",
+      "source_reflection_id": "reflection_761fed6b8775",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to stable_next_meeting_ignores_cancelled",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "stable_next_meeting_ignores_cancelled"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_stable_last_flight_destination",
+      "source_reflection_id": "reflection_26548334e595",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to stable_last_flight_destination",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "stable_last_flight_destination"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_stable_last_sync_human_name",
+      "source_reflection_id": "reflection_5e65b48a7bba",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to stable_last_sync_human_name",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "stable_last_sync_human_name"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_generated_prod_next_meeting",
+      "source_reflection_id": "reflection_0612bd65e2b2",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to generated_prod_next_meeting",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "generated_prod_next_meeting"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_generated_prod_last_sync",
+      "source_reflection_id": "reflection_ee681e200b46",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to generated_prod_last_sync",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "generated_prod_last_sync"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_generated_prod_last_flight",
+      "source_reflection_id": "reflection_1e8a70e61838",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to generated_prod_last_flight",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "generated_prod_last_flight"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_generated_prod_flight_arrival_timezone",
+      "source_reflection_id": "reflection_263ff4bcfa7e",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to generated_prod_flight_arrival_timezone",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "generated_prod_flight_arrival_timezone"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_generated_prod_free_time_alex",
+      "source_reflection_id": "reflection_db41fe53dd37",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to generated_prod_free_time_alex",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "generated_prod_free_time_alex"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_generated_prod_sarah_before_offsite",
+      "source_reflection_id": "reflection_65b56874db80",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to generated_prod_sarah_before_offsite",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "generated_prod_sarah_before_offsite"
+      ],
+      "status": "quarantined"
+    },
+    {
+      "id": "candidate_skill_useful_success_heldout_timezone_flight",
+      "source_reflection_id": "reflection_2e46c27596b1",
+      "title": "Recovered Pattern: Useful Success",
+      "lesson_type": "useful_success",
+      "trigger": "Similar scenario to heldout_timezone_flight",
+      "procedure": [
+        "Reuse the tool sequence from the successful session.",
+        "Keep the answer constrained to returned evidence IDs.",
+        "Promote only after category evals pass without heldout regression."
+      ],
+      "validation_evals": [
+        "heldout_timezone_flight"
+      ],
+      "status": "quarantined"
+    }
+  ],
+  "candidate_eval_promotions": [
+    {
+      "artifact_id": "generated_prod_next_meeting",
+      "artifact_type": "eval",
+      "status": "promoted",
+      "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+      "scores": {
+        "candidate_score": 1.0,
+        "heldout_score": 1.0
+      }
+    },
+    {
+      "artifact_id": "generated_prod_last_sync",
+      "artifact_type": "eval",
+      "status": "promoted",
+      "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+      "scores": {
+        "candidate_score": 1.0,
+        "heldout_score": 1.0
+      }
+    },
+    {
+      "artifact_id": "generated_prod_last_flight",
+      "artifact_type": "eval",
+      "status": "promoted",
+      "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+      "scores": {
+        "candidate_score": 1.0,
+        "heldout_score": 1.0
+      }
+    },
+    {
+      "artifact_id": "generated_prod_flight_arrival_timezone",
+      "artifact_type": "eval",
+      "status": "promoted",
+      "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+      "scores": {
+        "candidate_score": 1.0,
+        "heldout_score": 1.0
+      }
+    },
+    {
+      "artifact_id": "generated_prod_free_time_alex",
+      "artifact_type": "eval",
+      "status": "promoted",
+      "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+      "scores": {
+        "candidate_score": 1.0,
+        "heldout_score": 1.0
+      }
+    },
+    {
+      "artifact_id": "generated_prod_sarah_before_offsite",
+      "artifact_type": "eval",
+      "status": "promoted",
+      "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+      "scores": {
+        "candidate_score": 1.0,
+        "heldout_score": 1.0
+      }
+    }
+  ],
+  "evolution_decisions": {
+    "optimizer": "deterministic-reflective-gepa-lite+dspy-gepa-bridge",
+    "dspy_gepa": {
+      "backend": "dspy_gepa",
+      "enabled": true,
+      "active": false,
+      "artifacts": [
+        {
+          "name": "prompt_rules",
+          "seed_text": "Improve prompt rules for email/calendar reasoning while preserving tool evidence constraints.",
+          "objective": "Maximize generated+stable eval score without heldout regression.",
+          "actionable_side_information": [
+            "prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_next_meeting_ignores_cancelled: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_flight_destination: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_sync_human_name: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "heldout_timezone_flight: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_next_meeting_ignores_cancelled: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_flight_destination: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_sync_human_name: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "heldout_timezone_flight: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "Candidate eval generated_prod_next_meeting targets cancelled_events; expected evidence ('evt_ops_review',).",
+            "Candidate eval generated_prod_last_sync targets attendees_vs_senders; expected evidence ('mail_sync_dana',).",
+            "Candidate eval generated_prod_last_flight targets flight_emails; expected evidence ('mail_sfo_flight',).",
+            "Candidate eval generated_prod_flight_arrival_timezone targets time_zones; expected evidence ('mail_sfo_flight',).",
+            "Candidate eval generated_prod_free_time_alex targets ambiguous_contacts; expected evidence ().",
+            "Candidate eval generated_prod_sarah_before_offsite targets last_before_anchor; expected evidence ('evt_offsite', 'evt_sarah_before_offsite')."
+          ]
+        },
+        {
+          "name": "skill_text",
+          "seed_text": "Improve skill documents for recurring failure categories without overfitting to proper nouns.",
+          "objective": "Create reusable skill text that passes category evals and heldout checks.",
+          "actionable_side_information": [
+            "prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_next_meeting_ignores_cancelled: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_flight_destination: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_sync_human_name: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "heldout_timezone_flight: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_next_meeting_ignores_cancelled: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_flight_destination: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_sync_human_name: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "heldout_timezone_flight: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "Candidate skill candidate_skill_useful_success_prod_recurring_last_meeting is quarantined; validate on prod_recurring_last_meeting.",
+            "Candidate skill candidate_skill_useful_success_heldout_recurring_last_meeting is quarantined; validate on heldout_recurring_last_meeting.",
+            "Candidate skill candidate_skill_useful_success_heldout_sarah_not_sara is quarantined; validate on heldout_sarah_not_sara.",
+            "Candidate skill candidate_skill_useful_success_stable_next_meeting_ignores_cancelled is quarantined; validate on stable_next_meeting_ignores_cancelled.",
+            "Candidate skill candidate_skill_useful_success_stable_last_flight_destination is quarantined; validate on stable_last_flight_destination.",
+            "Candidate skill candidate_skill_useful_success_stable_last_sync_human_name is quarantined; validate on stable_last_sync_human_name.",
+            "Candidate skill candidate_skill_useful_success_generated_prod_next_meeting is quarantined; validate on generated_prod_next_meeting.",
+            "Candidate skill candidate_skill_useful_success_generated_prod_last_sync is quarantined; validate on generated_prod_last_sync.",
+            "Candidate skill candidate_skill_useful_success_generated_prod_last_flight is quarantined; validate on generated_prod_last_flight.",
+            "Candidate skill candidate_skill_useful_success_generated_prod_flight_arrival_timezone is quarantined; validate on generated_prod_flight_arrival_timezone.",
+            "Candidate skill candidate_skill_useful_success_generated_prod_free_time_alex is quarantined; validate on generated_prod_free_time_alex.",
+            "Candidate skill candidate_skill_useful_success_generated_prod_sarah_before_offsite is quarantined; validate on generated_prod_sarah_before_offsite.",
+            "Candidate skill candidate_skill_useful_success_heldout_timezone_flight is quarantined; validate on heldout_timezone_flight."
+          ]
+        },
+        {
+          "name": "tool_descriptions",
+          "seed_text": "Clarify Gmail and Calendar tool descriptions so the agent uses correct filters and evidence.",
+          "objective": "Reduce tool misuse such as cancelled event inclusion and missing time bounds.",
+          "actionable_side_information": [
+            "prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_next_meeting_ignores_cancelled: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_flight_destination: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_sync_human_name: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "heldout_timezone_flight: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_next_meeting_ignores_cancelled: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_flight_destination: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "stable_last_sync_human_name: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_next_meeting: lesson=missing_evidence; root_cause=cancelled_events; summary=Failure classified as missing_evidence: forbidden answer content present: ['Recruiting screen'].; evidence=('evt_cancelled_recruiting', 'evt_ops_review', 'evt_offsite', 'evt_alex_1on1', 'evt_board_prep'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_sync: lesson=missing_evidence; root_cause=attendees_vs_senders; summary=Failure classified as missing_evidence: forbidden answer content present: ['dana@example.com'].; evidence=('mail_sync_dana', 'mail_sync_sarah'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_last_flight: lesson=missing_evidence; root_cause=flight_emails; summary=Failure classified as missing_evidence: forbidden answer content present: ['JFK'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_flight_arrival_timezone: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_free_time_alex: lesson=ambiguous_contact; root_cause=ambiguous_contacts; summary=Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].; evidence=(); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "generated_prod_sarah_before_offsite: lesson=bad_temporal_reasoning; root_cause=last_before_anchor; summary=Failure classified as bad_temporal_reasoning: forbidden answer content present: ['Leadership offsite on May 2'].; evidence=('evt_sarah_old', 'evt_sarah_before_offsite', 'evt_sarah_cancelled', 'evt_offsite'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior.",
+            "heldout_timezone_flight: lesson=timezone_loss; root_cause=time_zones; summary=Failure classified as timezone_loss: forbidden answer content present: ['2:35 PM ET'].; evidence=('mail_sfo_flight', 'mail_seattle_flight'); Do not overfit to names, dates, or airport codes; preserve task schema and heldout behavior."
+          ]
+        }
+      ],
+      "log_dir": "/Users/okay/Documents/email-calendar-agent-lab/logs/gepa",
+      "reason": "dspy is not installed; run python3 -m pip install -e ."
+    },
+    "prompt_rule_variants": [
+      "clarify_ambiguous_contacts",
+      "exclude_cancelled_events",
+      "parse_flight_destination",
+      "prefer_human_participants",
+      "preserve_source_timezones",
+      "respect_temporal_anchors"
+    ],
+    "decisions": [
+      {
+        "artifact_id": "generated_prod_next_meeting",
+        "artifact_type": "eval",
+        "status": "promoted",
+        "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+        "scores": {
+          "candidate_score": 1.0,
+          "heldout_score": 1.0
+        }
+      },
+      {
+        "artifact_id": "generated_prod_last_sync",
+        "artifact_type": "eval",
+        "status": "promoted",
+        "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+        "scores": {
+          "candidate_score": 1.0,
+          "heldout_score": 1.0
+        }
+      },
+      {
+        "artifact_id": "generated_prod_last_flight",
+        "artifact_type": "eval",
+        "status": "promoted",
+        "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+        "scores": {
+          "candidate_score": 1.0,
+          "heldout_score": 1.0
+        }
+      },
+      {
+        "artifact_id": "generated_prod_flight_arrival_timezone",
+        "artifact_type": "eval",
+        "status": "promoted",
+        "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+        "scores": {
+          "candidate_score": 1.0,
+          "heldout_score": 1.0
+        }
+      },
+      {
+        "artifact_id": "generated_prod_free_time_alex",
+        "artifact_type": "eval",
+        "status": "promoted",
+        "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+        "scores": {
+          "candidate_score": 1.0,
+          "heldout_score": 1.0
+        }
+      },
+      {
+        "artifact_id": "generated_prod_sarah_before_offsite",
+        "artifact_type": "eval",
+        "status": "promoted",
+        "reason": "candidate eval captures a generalizable failure and current candidate improved safely",
+        "scores": {
+          "candidate_score": 1.0,
+          "heldout_score": 1.0
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_prod_recurring_last_meeting",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "prod_recurring_last_meeting"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_heldout_recurring_last_meeting",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "heldout_recurring_last_meeting"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_heldout_sarah_not_sara",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "heldout_sarah_not_sara"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_stable_next_meeting_ignores_cancelled",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "stable_next_meeting_ignores_cancelled"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_stable_last_flight_destination",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "stable_last_flight_destination"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_stable_last_sync_human_name",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "stable_last_sync_human_name"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_generated_prod_next_meeting",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "generated_prod_next_meeting"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_generated_prod_last_sync",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "generated_prod_last_sync"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_generated_prod_last_flight",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "generated_prod_last_flight"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_generated_prod_flight_arrival_timezone",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "generated_prod_flight_arrival_timezone"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_generated_prod_free_time_alex",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "generated_prod_free_time_alex"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_generated_prod_sarah_before_offsite",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "generated_prod_sarah_before_offsite"
+          ]
+        }
+      },
+      {
+        "artifact_id": "candidate_skill_useful_success_heldout_timezone_flight",
+        "artifact_type": "skill",
+        "status": "quarantined",
+        "reason": "candidate skill mined from success; requires category-specific validation before promotion",
+        "scores": {
+          "validation_evals": [
+            "heldout_timezone_flight"
+          ]
+        }
+      },
+      {
+        "artifact_id": "bad_prompt_variant",
+        "artifact_type": "prompt_rule",
+        "status": "rejected",
+        "reason": "deliberate bad/no-op prompt variant did not improve generated+stable eval score",
+        "scores": {
+          "current_score": 0.0,
+          "candidate_score": 0.0
+        }
+      }
+    ],
+    "accepted_count": 6,
+    "rejected_count": 1,
+    "quarantined_count": 13
+  },
+  "rejected_candidate": {
+    "prompt_rules": [
+      "minimal_tool_use",
+      "answer_fast_without_new_evidence"
+    ],
+    "eval_score": {
+      "passed": 0,
+      "total": 9,
+      "score": 0.0,
+      "by_category": {
+        "cancelled_events": {
+          "passed": 0,
+          "total": 2
+        },
+        "flight_emails": {
+          "passed": 0,
+          "total": 3
+        },
+        "attendees_vs_senders": {
+          "passed": 0,
+          "total": 2
+        },
+        "ambiguous_contacts": {
+          "passed": 0,
+          "total": 1
+        },
+        "last_before_anchor": {
+          "passed": 0,
+          "total": 1
+        }
+      }
+    },
+    "heldout_score": {
+      "passed": 2,
+      "total": 3,
+      "score": 0.667,
+      "by_category": {
+        "recurring_meetings": {
+          "passed": 1,
+          "total": 1
+        },
+        "time_zones": {
+          "passed": 0,
+          "total": 1
+        },
+        "ambiguous_contacts": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    "decision": "rejected: did not improve generated+stable eval score",
+    "accepted": false
+  },
+  "self_improvement": {
+    "current_prompt_rules": [
+      "minimal_tool_use"
+    ],
+    "candidate_prompt_rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors"
+    ],
+    "current_eval_score": {
+      "passed": 0,
+      "total": 9,
+      "score": 0.0,
+      "by_category": {
+        "cancelled_events": {
+          "passed": 0,
+          "total": 2
+        },
+        "flight_emails": {
+          "passed": 0,
+          "total": 3
+        },
+        "attendees_vs_senders": {
+          "passed": 0,
+          "total": 2
+        },
+        "ambiguous_contacts": {
+          "passed": 0,
+          "total": 1
+        },
+        "last_before_anchor": {
+          "passed": 0,
+          "total": 1
+        }
+      }
+    },
+    "candidate_eval_score": {
+      "passed": 9,
+      "total": 9,
+      "score": 1.0,
+      "by_category": {
+        "cancelled_events": {
+          "passed": 2,
+          "total": 2
+        },
+        "flight_emails": {
+          "passed": 3,
+          "total": 3
+        },
+        "attendees_vs_senders": {
+          "passed": 2,
+          "total": 2
+        },
+        "ambiguous_contacts": {
+          "passed": 1,
+          "total": 1
+        },
+        "last_before_anchor": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    "category_delta": {
+      "ambiguous_contacts": {
+        "before": {
+          "passed": 0,
+          "total": 1
+        },
+        "after": {
+          "passed": 1,
+          "total": 1
+        },
+        "passed_delta": 1
+      },
+      "attendees_vs_senders": {
+        "before": {
+          "passed": 0,
+          "total": 2
+        },
+        "after": {
+          "passed": 2,
+          "total": 2
+        },
+        "passed_delta": 2
+      },
+      "cancelled_events": {
+        "before": {
+          "passed": 0,
+          "total": 2
+        },
+        "after": {
+          "passed": 2,
+          "total": 2
+        },
+        "passed_delta": 2
+      },
+      "flight_emails": {
+        "before": {
+          "passed": 0,
+          "total": 3
+        },
+        "after": {
+          "passed": 3,
+          "total": 3
+        },
+        "passed_delta": 3
+      },
+      "last_before_anchor": {
+        "before": {
+          "passed": 0,
+          "total": 1
+        },
+        "after": {
+          "passed": 1,
+          "total": 1
+        },
+        "passed_delta": 1
+      }
+    },
+    "current_heldout_score": {
+      "passed": 2,
+      "total": 3,
+      "score": 0.667,
+      "by_category": {
+        "recurring_meetings": {
+          "passed": 1,
+          "total": 1
+        },
+        "time_zones": {
+          "passed": 0,
+          "total": 1
+        },
+        "ambiguous_contacts": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    "candidate_heldout_score": {
+      "passed": 3,
+      "total": 3,
+      "score": 1.0,
+      "by_category": {
+        "recurring_meetings": {
+          "passed": 1,
+          "total": 1
+        },
+        "time_zones": {
+          "passed": 1,
+          "total": 1
+        },
+        "ambiguous_contacts": {
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    "heldout_category_delta": {
+      "ambiguous_contacts": {
+        "before": {
+          "passed": 1,
+          "total": 1
+        },
+        "after": {
+          "passed": 1,
+          "total": 1
+        },
+        "passed_delta": 0
+      },
+      "recurring_meetings": {
+        "before": {
+          "passed": 1,
+          "total": 1
+        },
+        "after": {
+          "passed": 1,
+          "total": 1
+        },
+        "passed_delta": 0
+      },
+      "time_zones": {
+        "before": {
+          "passed": 0,
+          "total": 1
+        },
+        "after": {
+          "passed": 1,
+          "total": 1
+        },
+        "passed_delta": 1
+      }
+    },
+    "decision": "accepted: improved generated+stable eval score without heldout regression",
+    "accepted": true
+  },
+  "before_after_eval_runs": {
+    "before": [
+      {
+        "scenario_id": "stable_next_meeting_ignores_cancelled",
+        "query": "What meeting is next on my calendar?",
+        "answer": "Your next meeting is Recruiting screen at 11:00 AM.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-01 10:00:00-04:00",
+              "time_max": null,
+              "attendee": null,
+              "include_cancelled": true
+            },
+            "result_count": 5,
+            "evidence_ids": [
+              "evt_cancelled_recruiting",
+              "evt_ops_review",
+              "evt_offsite",
+              "evt_alex_1on1",
+              "evt_board_prep"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['Recruiting screen']",
+        "root_cause": "cancelled_events"
+      },
+      {
+        "scenario_id": "stable_last_flight_destination",
+        "query": "What city did I fly to most recently?",
+        "answer": "Your last flight was from JFK.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['JFK']",
+        "root_cause": "flight_emails"
+      },
+      {
+        "scenario_id": "stable_last_sync_human_name",
+        "query": "Who did I last sync with?",
+        "answer": "You last synced with dana@example.com.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "sync",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sync_dana",
+              "mail_sync_sarah"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['dana@example.com']",
+        "root_cause": "attendees_vs_senders"
+      },
+      {
+        "scenario_id": "generated_prod_next_meeting",
+        "query": "When is my next meeting?",
+        "answer": "Your next meeting is Recruiting screen at 11:00 AM.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-01 10:00:00-04:00",
+              "time_max": null,
+              "attendee": null,
+              "include_cancelled": true
+            },
+            "result_count": 5,
+            "evidence_ids": [
+              "evt_cancelled_recruiting",
+              "evt_ops_review",
+              "evt_offsite",
+              "evt_alex_1on1",
+              "evt_board_prep"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['Recruiting screen']",
+        "root_cause": "cancelled_events"
+      },
+      {
+        "scenario_id": "generated_prod_last_sync",
+        "query": "Who did I last sync with?",
+        "answer": "You last synced with dana@example.com.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "sync",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sync_dana",
+              "mail_sync_sarah"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['dana@example.com']",
+        "root_cause": "attendees_vs_senders"
+      },
+      {
+        "scenario_id": "generated_prod_last_flight",
+        "query": "Where was my last flight?",
+        "answer": "Your last flight was from JFK.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['JFK']",
+        "root_cause": "flight_emails"
+      },
+      {
+        "scenario_id": "generated_prod_flight_arrival_timezone",
+        "query": "What time did my last flight arrive?",
+        "answer": "Your last flight arrived at 2:35 PM ET.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['2:35 PM ET']",
+        "root_cause": "time_zones"
+      },
+      {
+        "scenario_id": "generated_prod_free_time_alex",
+        "query": "Find free time with Alex next week?",
+        "answer": "You and Alex Rivera are free Tuesday at 10:00 AM.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-04 10:00:00-04:00",
+              "time_max": "2026-05-09 10:00:00-04:00",
+              "attendee": "alex.rivera@example.com",
+              "include_cancelled": false
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          },
+          {
+            "tool": "calendar.free_busy",
+            "args": {
+              "attendee": "alex.rivera@example.com",
+              "start": "2026-05-04 10:00:00-04:00",
+              "end": "2026-05-09 10:00:00-04:00"
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['You and Alex Rivera are free']",
+        "root_cause": "ambiguous_contacts"
+      },
+      {
+        "scenario_id": "generated_prod_sarah_before_offsite",
+        "query": "When did I last meet Sarah before the offsite?",
+        "answer": "You last met Sarah at Leadership offsite on May 2.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": null,
+              "time_max": null,
+              "attendee": "sarah@example.com",
+              "include_cancelled": true
+            },
+            "result_count": 4,
+            "evidence_ids": [
+              "evt_sarah_old",
+              "evt_sarah_before_offsite",
+              "evt_sarah_cancelled",
+              "evt_offsite"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['Leadership offsite on May 2']",
+        "root_cause": "last_before_anchor"
+      }
+    ],
+    "after": [
+      {
+        "scenario_id": "stable_next_meeting_ignores_cancelled",
+        "query": "What meeting is next on my calendar?",
+        "answer": "Your next meeting is Ops review at 1:00 PM.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-01 10:00:00-04:00",
+              "time_max": null,
+              "attendee": null,
+              "include_cancelled": false
+            },
+            "result_count": 4,
+            "evidence_ids": [
+              "evt_ops_review",
+              "evt_offsite",
+              "evt_alex_1on1",
+              "evt_board_prep"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "stable_last_flight_destination",
+        "query": "What city did I fly to most recently?",
+        "answer": "Your last flight was to SFO.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "stable_last_sync_human_name",
+        "query": "Who did I last sync with?",
+        "answer": "You last synced with Dana Kim.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "sync",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sync_dana",
+              "mail_sync_sarah"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "generated_prod_next_meeting",
+        "query": "When is my next meeting?",
+        "answer": "Your next meeting is Ops review at 1:00 PM.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-01 10:00:00-04:00",
+              "time_max": null,
+              "attendee": null,
+              "include_cancelled": false
+            },
+            "result_count": 4,
+            "evidence_ids": [
+              "evt_ops_review",
+              "evt_offsite",
+              "evt_alex_1on1",
+              "evt_board_prep"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "generated_prod_last_sync",
+        "query": "Who did I last sync with?",
+        "answer": "You last synced with Dana Kim.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "sync",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sync_dana",
+              "mail_sync_sarah"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "generated_prod_last_flight",
+        "query": "Where was my last flight?",
+        "answer": "Your last flight was to SFO.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "generated_prod_flight_arrival_timezone",
+        "query": "What time did my last flight arrive?",
+        "answer": "Your last flight arrived at 11:35 AM PT.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "generated_prod_free_time_alex",
+        "query": "Find free time with Alex next week?",
+        "answer": "Which Alex do you mean: Alex Chen, Alex Rivera?",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-04 10:00:00-04:00",
+              "time_max": "2026-05-09 10:00:00-04:00",
+              "attendee": "alex.chen@example.com",
+              "include_cancelled": false
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          },
+          {
+            "tool": "calendar.free_busy",
+            "args": {
+              "attendee": "alex.chen@example.com",
+              "start": "2026-05-04 10:00:00-04:00",
+              "end": "2026-05-09 10:00:00-04:00"
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          },
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": "2026-05-04 10:00:00-04:00",
+              "time_max": "2026-05-09 10:00:00-04:00",
+              "attendee": "alex.rivera@example.com",
+              "include_cancelled": false
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          },
+          {
+            "tool": "calendar.free_busy",
+            "args": {
+              "attendee": "alex.rivera@example.com",
+              "start": "2026-05-04 10:00:00-04:00",
+              "end": "2026-05-09 10:00:00-04:00"
+            },
+            "result_count": 0,
+            "evidence_ids": []
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "generated_prod_sarah_before_offsite",
+        "query": "When did I last meet Sarah before the offsite?",
+        "answer": "You last met Sarah before the offsite at Sarah roadmap review on Apr 22.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": "offsite",
+              "time_min": "2026-05-01 10:00:00-04:00",
+              "time_max": null,
+              "attendee": null,
+              "include_cancelled": false
+            },
+            "result_count": 1,
+            "evidence_ids": [
+              "evt_offsite"
+            ]
+          },
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": null,
+              "time_max": "2026-05-02 09:00:00-04:00",
+              "attendee": "sarah@example.com",
+              "include_cancelled": false
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "evt_sarah_old",
+              "evt_sarah_before_offsite"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      }
+    ]
+  },
+  "heldout_runs": {
+    "before": [
+      {
+        "scenario_id": "heldout_recurring_last_meeting",
+        "query": "What was my last recurring team meeting?",
+        "answer": "Your last recurring team meeting was Team standup on Apr 30.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": "Team standup",
+              "time_min": null,
+              "time_max": "2026-05-01 10:00:00-04:00",
+              "attendee": null,
+              "include_cancelled": false
+            },
+            "result_count": 4,
+            "evidence_ids": [
+              "evt_standup_27",
+              "evt_standup_28",
+              "evt_standup_29",
+              "evt_standup_30"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "heldout_timezone_flight",
+        "query": "What time did my last flight arrive?",
+        "answer": "Your last flight arrived at 2:35 PM ET.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['2:35 PM ET']",
+        "root_cause": "time_zones"
+      },
+      {
+        "scenario_id": "heldout_sarah_not_sara",
+        "query": "When did I last meet Sarah?",
+        "answer": "You last met Sarah at Sarah roadmap review on Apr 22.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": null,
+              "time_max": "2026-05-01 10:00:00-04:00",
+              "attendee": "sarah@example.com",
+              "include_cancelled": false
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "evt_sarah_old",
+              "evt_sarah_before_offsite"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      }
+    ],
+    "after": [
+      {
+        "scenario_id": "heldout_recurring_last_meeting",
+        "query": "What was my last recurring team meeting?",
+        "answer": "Your last recurring team meeting was Team standup on Apr 30.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": "Team standup",
+              "time_min": null,
+              "time_max": "2026-05-01 10:00:00-04:00",
+              "attendee": null,
+              "include_cancelled": false
+            },
+            "result_count": 4,
+            "evidence_ids": [
+              "evt_standup_27",
+              "evt_standup_28",
+              "evt_standup_29",
+              "evt_standup_30"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "heldout_timezone_flight",
+        "query": "What time did my last flight arrive?",
+        "answer": "Your last flight arrived at 11:35 AM PT.",
+        "tool_calls": [
+          {
+            "tool": "gmail.search_emails",
+            "args": {
+              "query": "flight",
+              "after": null,
+              "before": null
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "mail_sfo_flight",
+              "mail_seattle_flight"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      },
+      {
+        "scenario_id": "heldout_sarah_not_sara",
+        "query": "When did I last meet Sarah?",
+        "answer": "You last met Sarah at Sarah roadmap review on Apr 22.",
+        "tool_calls": [
+          {
+            "tool": "calendar.search_events",
+            "args": {
+              "query": null,
+              "time_min": null,
+              "time_max": "2026-05-01 10:00:00-04:00",
+              "attendee": "sarah@example.com",
+              "include_cancelled": false
+            },
+            "result_count": 2,
+            "evidence_ids": [
+              "evt_sarah_old",
+              "evt_sarah_before_offsite"
+            ]
+          }
+        ],
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null
+      }
+    ]
+  }
+}

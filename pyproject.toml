@@ -1,0 +1,18 @@
+[project]
+name = "email-calendar-agent-lab"
+version = "0.1.0"
+description = "Self-improving mocked email/calendar agent reliability lab"
+requires-python = ">=3.11"
+dependencies = ["langfuse", "dspy", "gepa"]
+
+[project.scripts]
+email-calendar-lab = "email_calendar_lab.run_cycle:main"
+email-calendar-lab-eval = "email_calendar_lab.run_cycle:main"
+email-calendar-lab-validate = "email_calendar_lab.validate_evals:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}

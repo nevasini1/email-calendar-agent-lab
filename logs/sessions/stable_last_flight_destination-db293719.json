@@ -1,0 +1,118 @@
+{
+  "id": "stable_last_flight_destination-db293719",
+  "scenario_id": "stable_last_flight_destination",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ]
+  },
+  "started_at": "2026-05-01T16:13:53Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "Your last flight was from JFK."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['JFK']",
+        "root_cause": "flight_emails",
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "flight",
+        "after": null,
+        "before": null
+      },
+      "result_count": 2,
+      "evidence_ids": [
+        "mail_sfo_flight",
+        "mail_seattle_flight"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['JFK']",
+    "root_cause": "flight_emails",
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "stable_last_flight_destination",
+    "query": "What city did I fly to most recently?",
+    "answer": "Your last flight was from JFK.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['JFK']",
+    "root_cause": "flight_emails"
+  }
+}

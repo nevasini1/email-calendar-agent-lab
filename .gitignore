@@ -1,0 +1,5 @@
+.env.langfuse.local
+.langfuse/
+__pycache__/
+*.pyc
+.DS_Store

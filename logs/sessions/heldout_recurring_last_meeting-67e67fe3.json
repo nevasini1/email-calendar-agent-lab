@@ -1,0 +1,132 @@
+{
+  "id": "heldout_recurring_last_meeting-67e67fe3",
+  "scenario_id": "heldout_recurring_last_meeting",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ]
+  },
+  "started_at": "2026-05-01T16:00:24Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "Team standup",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 4,
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "Your last recurring team meeting was Team standup on Apr 30."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null,
+        "expected_evidence_ids": [
+          "evt_standup_30"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "Team standup",
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 4,
+      "evidence_ids": [
+        "evt_standup_27",
+        "evt_standup_28",
+        "evt_standup_29",
+        "evt_standup_30"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null,
+    "expected_evidence_ids": [
+      "evt_standup_30"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "heldout_recurring_last_meeting",
+    "query": "What was my last recurring team meeting?",
+    "answer": "Your last recurring team meeting was Team standup on Apr 30.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "Team standup",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 4,
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ]
+      }
+    ],
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null
+  }
+}

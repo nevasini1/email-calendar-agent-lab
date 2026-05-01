@@ -1,0 +1,136 @@
+{
+  "id": "generated_prod_last_sync-bb6da3de",
+  "scenario_id": "generated_prod_last_sync",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "ambiguous_contact_resolution"
+    ],
+    "skill_summaries": [
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+    ]
+  },
+  "started_at": "2026-05-01T17:50:24Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "ambiguous_contact_resolution"
+        ],
+        "skill_summaries": [
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "sync",
+          "after": null,
+          "before": null
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "You last synced with dana@example.com."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['dana@example.com']",
+        "root_cause": "attendees_vs_senders",
+        "expected_evidence_ids": [
+          "mail_sync_dana"
+        ],
+        "loaded_skill_ids": [
+          "ambiguous_contact_resolution"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "sync",
+        "after": null,
+        "before": null
+      },
+      "result_count": 2,
+      "evidence_ids": [
+        "mail_sync_dana",
+        "mail_sync_sarah"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['dana@example.com']",
+    "root_cause": "attendees_vs_senders",
+    "expected_evidence_ids": [
+      "mail_sync_dana"
+    ],
+    "loaded_skill_ids": [
+      "ambiguous_contact_resolution"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_last_sync",
+    "query": "Who did I last sync with?",
+    "answer": "You last synced with dana@example.com.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "sync",
+          "after": null,
+          "before": null
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['dana@example.com']",
+    "root_cause": "attendees_vs_senders"
+  }
+}
