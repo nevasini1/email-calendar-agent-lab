@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from .models import CalendarEvent, Contact, Email, Scenario
+from .models import CalendarEvent, Contact, Email, EmailAttachment, Scenario
 
 NY = ZoneInfo("America/New_York")
 LA = ZoneInfo("America/Los_Angeles")
@@ -110,6 +110,65 @@ EMAILS = (
         "Sarah sync agenda",
         _dt(2026, 4, 29, 9),
         "Agenda for your Sarah sync. Sarah will join directly.",
+    ),
+    Email(
+        "mail_meeting_request_maya",
+        "maya@example.com",
+        ("me@example.com",),
+        "Can we meet about the launch plan?",
+        _dt(2026, 5, 1, 8, 45),
+        "Could we meet next Tuesday for 30 minutes about the launch plan? I can do after 10 AM.",
+        thread_id="thread_launch_plan",
+        labels=("inbox", "action_required"),
+        importance=9,
+        sentiment="neutral",
+        action_items=("schedule_meeting",),
+    ),
+    Email(
+        "mail_cancellation_ops",
+        "jordan@example.com",
+        ("me@example.com",),
+        "Need to cancel ops review",
+        _dt(2026, 5, 1, 9, 5),
+        "Sorry, I need to cancel today's Ops review. Please remove it from the calendar and let Dana know.",
+        thread_id="thread_ops_review",
+        labels=("inbox", "action_required"),
+        importance=8,
+        sentiment="negative",
+        action_items=("cancel_event", "notify_participants"),
+    ),
+    Email(
+        "mail_escalation_customer",
+        "customer@example.com",
+        ("me@example.com",),
+        "This rollout is blocked",
+        _dt(2026, 5, 1, 9, 20),
+        "We are frustrated that the rollout is still blocked. Please escalate this today.",
+        thread_id="thread_customer_rollout",
+        labels=("inbox", "customer"),
+        importance=10,
+        sentiment="negative",
+        action_items=("escalate",),
+    ),
+    Email(
+        "mail_attachment_briefing",
+        "events@example.com",
+        ("me@example.com",),
+        "Briefing details attached",
+        _dt(2026, 4, 30, 13, 15),
+        "The attached note has the confirmed briefing details.",
+        thread_id="thread_briefing",
+        attachments=(
+            EmailAttachment(
+                "att_briefing_note",
+                "briefing.txt",
+                "text/plain",
+                "Briefing: May 6, 2026 at 2:30 PM ET in Room 4B.",
+            ),
+        ),
+        labels=("inbox",),
+        importance=6,
+        sentiment="neutral",
     ),
 )
 

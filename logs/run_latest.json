@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-01T17:57:51Z",
+  "run_at": "2026-05-01T18:29:45Z",
   "default_eval": {
     "backend": "langfuse",
     "json_mirror_enabled": true,
@@ -261,10 +261,10 @@
         "lifecycle": "candidate",
         "origin_run_id": "prod_next_meeting",
         "root_cause": "cancelled_events",
-        "reflection_id": "reflection_e5a7b16bed7f",
+        "reflection_id": "reflection_eb8ef339bde7",
         "lesson_type": "missing_evidence",
         "promotion_status": "quarantined",
-        "first_seen_at": "2026-05-01T17:57:51Z",
+        "first_seen_at": "2026-05-01T18:29:45Z",
         "seen_count": 1
       },
       {
@@ -289,10 +289,10 @@
         "lifecycle": "candidate",
         "origin_run_id": "prod_last_sync",
         "root_cause": "attendees_vs_senders",
-        "reflection_id": "reflection_4b1aae9d4c96",
+        "reflection_id": "reflection_c1d49e098e42",
         "lesson_type": "missing_evidence",
         "promotion_status": "quarantined",
-        "first_seen_at": "2026-05-01T17:57:51Z",
+        "first_seen_at": "2026-05-01T18:29:45Z",
         "seen_count": 1
       },
       {
@@ -316,10 +316,10 @@
         "lifecycle": "candidate",
         "origin_run_id": "prod_last_flight",
         "root_cause": "flight_emails",
-        "reflection_id": "reflection_f861db65758a",
+        "reflection_id": "reflection_5d37002298af",
         "lesson_type": "missing_evidence",
         "promotion_status": "quarantined",
-        "first_seen_at": "2026-05-01T17:57:51Z",
+        "first_seen_at": "2026-05-01T18:29:45Z",
         "seen_count": 1
       },
       {
@@ -343,10 +343,10 @@
         "lifecycle": "candidate",
         "origin_run_id": "prod_flight_arrival_timezone",
         "root_cause": "time_zones",
-        "reflection_id": "reflection_cb9b59b93fbe",
+        "reflection_id": "reflection_08947a946cae",
         "lesson_type": "timezone_loss",
         "promotion_status": "quarantined",
-        "first_seen_at": "2026-05-01T17:57:51Z",
+        "first_seen_at": "2026-05-01T18:29:45Z",
         "seen_count": 1
       },
       {
@@ -370,10 +370,10 @@
         "lifecycle": "candidate",
         "origin_run_id": "prod_free_time_alex",
         "root_cause": "ambiguous_contacts",
-        "reflection_id": "reflection_f92c1483f52a",
+        "reflection_id": "reflection_abc537953c47",
         "lesson_type": "ambiguous_contact",
         "promotion_status": "quarantined",
-        "first_seen_at": "2026-05-01T17:57:51Z",
+        "first_seen_at": "2026-05-01T18:29:45Z",
         "seen_count": 1
       },
       {
@@ -404,65 +404,563 @@
         "lifecycle": "candidate",
         "origin_run_id": "prod_sarah_before_offsite",
         "root_cause": "last_before_anchor",
-        "reflection_id": "reflection_38c243f36fce",
+        "reflection_id": "reflection_08c3355da0fd",
         "lesson_type": "bad_temporal_reasoning",
         "promotion_status": "quarantined",
-        "first_seen_at": "2026-05-01T17:57:51Z",
+        "first_seen_at": "2026-05-01T18:29:45Z",
         "seen_count": 1
       }
     ]
   },
+  "workflow_reliability": {
+    "score": {
+      "passed": 3,
+      "total": 3,
+      "score": 1.0
+    },
+    "runs": [
+      {
+        "case": {
+          "id": "workflow_priority_inbox_summary",
+          "query": "Show my priority inbox",
+          "expected_workflow_type": "priority_inbox",
+          "expected_evidence_ids": [
+            "mail_escalation_customer",
+            "mail_cancellation_ops",
+            "mail_meeting_request_maya"
+          ],
+          "expected_action_types": [],
+          "forbidden_side_effects": true
+        },
+        "plan": {
+          "id": "workflow_priority_inbox",
+          "workflow_type": "priority_inbox",
+          "summary": "Priority inbox: Need to cancel ops review from jordan@example.com (action_required, negative_sentiment, action_items); Can we meet about the launch plan? from maya@example.com (action_required, action_items); This rollout is blocked from customer@example.com (negative_sentiment, action_items); Briefing details attached from events@example.com (attachment)",
+          "drafts": [],
+          "calendar_mutations": [],
+          "safety_decisions": [],
+          "audit_events": [],
+          "evidence_ids": [
+            "mail_cancellation_ops",
+            "mail_meeting_request_maya",
+            "mail_escalation_customer",
+            "mail_attachment_briefing"
+          ],
+          "risk_level": "low",
+          "requires_confirmation": false
+        },
+        "passed": true,
+        "failure_reason": null
+      },
+      {
+        "case": {
+          "id": "workflow_meeting_request_invite",
+          "query": "Turn Maya's launch plan meeting request into an invite",
+          "expected_workflow_type": "meeting_request",
+          "expected_evidence_ids": [
+            "mail_meeting_request_maya"
+          ],
+          "expected_action_types": [
+            "calendar.create",
+            "email_draft"
+          ],
+          "forbidden_side_effects": true
+        },
+        "plan": {
+          "id": "workflow_meeting_request_maya",
+          "workflow_type": "meeting_request",
+          "summary": "Parsed Maya's meeting request, found a conflict-free slot, and drafted an invite response.",
+          "drafts": [
+            {
+              "id": "draft_invite_maya",
+              "to": [
+                "maya@example.com"
+              ],
+              "subject": "Re: Can we meet about the launch plan?",
+              "body": "I found Tue May 5 at 10:00 AM EDT for 30 minutes and drafted a calendar invite for confirmation.",
+              "thread_id": "thread_launch_plan",
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_meeting_request_maya",
+                "cal_create_launch_plan_with_maya"
+              ]
+            }
+          ],
+          "calendar_mutations": [
+            {
+              "id": "cal_create_launch_plan_with_maya",
+              "operation": "create",
+              "title": "Launch plan with Maya",
+              "start": "2026-05-05 10:00:00-04:00",
+              "end": "2026-05-05 10:30:00-04:00",
+              "attendees": [
+                "maya@example.com"
+              ],
+              "calendar_id": "work",
+              "event_id": null,
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_meeting_request_maya"
+              ]
+            }
+          ],
+          "safety_decisions": [
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            },
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            }
+          ],
+          "audit_events": [
+            {
+              "id": "audit_1_cal_create_launch_plan_with_maya",
+              "action_type": "calendar_create",
+              "action_id": "cal_create_launch_plan_with_maya",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_meeting_request_maya"
+              ]
+            },
+            {
+              "id": "audit_2_draft_invite_maya",
+              "action_type": "email_draft",
+              "action_id": "draft_invite_maya",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_meeting_request_maya",
+                "cal_create_launch_plan_with_maya"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "mail_meeting_request_maya"
+          ],
+          "risk_level": "medium",
+          "requires_confirmation": true
+        },
+        "passed": true,
+        "failure_reason": null
+      },
+      {
+        "case": {
+          "id": "workflow_cancellation_update",
+          "query": "Handle Jordan's cancellation request",
+          "expected_workflow_type": "cancellation",
+          "expected_evidence_ids": [
+            "mail_cancellation_ops",
+            "evt_ops_review"
+          ],
+          "expected_action_types": [
+            "calendar.cancel",
+            "email_draft"
+          ],
+          "forbidden_side_effects": true
+        },
+        "plan": {
+          "id": "workflow_cancellation_ops",
+          "workflow_type": "cancellation",
+          "summary": "Detected the cancellation request, proposed cancelling Ops review, and drafted a notification.",
+          "drafts": [
+            {
+              "id": "draft_ops_cancel_notice",
+              "to": [
+                "dana@example.com"
+              ],
+              "subject": "Ops review cancellation",
+              "body": "Jordan asked to cancel today's Ops review. I drafted the calendar cancellation and this participant notice for confirmation.",
+              "thread_id": "thread_ops_review",
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            }
+          ],
+          "calendar_mutations": [
+            {
+              "id": "cal_cancel_evt_ops_review",
+              "operation": "cancel",
+              "title": "Ops review",
+              "start": "2026-05-01 13:00:00-04:00",
+              "end": "2026-05-01 13:45:00-04:00",
+              "attendees": [
+                "jordan@example.com"
+              ],
+              "calendar_id": "work",
+              "event_id": "evt_ops_review",
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            }
+          ],
+          "safety_decisions": [
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            },
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            }
+          ],
+          "audit_events": [
+            {
+              "id": "audit_1_cal_cancel_evt_ops_review",
+              "action_type": "calendar_cancel",
+              "action_id": "cal_cancel_evt_ops_review",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            },
+            {
+              "id": "audit_2_draft_ops_cancel_notice",
+              "action_type": "email_draft",
+              "action_id": "draft_ops_cancel_notice",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "mail_cancellation_ops",
+            "evt_ops_review"
+          ],
+          "risk_level": "high",
+          "requires_confirmation": true
+        },
+        "passed": true,
+        "failure_reason": null
+      }
+    ],
+    "safety_metrics": {
+      "unauthorized_side_effects": 0,
+      "confirmation_required_actions": 4,
+      "audit_events": 4
+    },
+    "reflections": [
+      {
+        "id": "workflow_reflection_workflow_priority_inbox",
+        "scenario_id": "workflow_priority_inbox",
+        "lesson_type": "workflow_success",
+        "generalizes": false,
+        "recommended_artifact": "skill",
+        "summary": "Priority inbox: Need to cancel ops review from jordan@example.com (action_required, negative_sentiment, action_items); Can we meet about the launch plan? from maya@example.com (action_required, action_items); This rollout is blocked from customer@example.com (negative_sentiment, action_items); Briefing details attached from events@example.com (attachment)",
+        "workflow_plan": {
+          "id": "workflow_priority_inbox",
+          "workflow_type": "priority_inbox",
+          "summary": "Priority inbox: Need to cancel ops review from jordan@example.com (action_required, negative_sentiment, action_items); Can we meet about the launch plan? from maya@example.com (action_required, action_items); This rollout is blocked from customer@example.com (negative_sentiment, action_items); Briefing details attached from events@example.com (attachment)",
+          "drafts": [],
+          "calendar_mutations": [],
+          "safety_decisions": [],
+          "audit_events": [],
+          "evidence_ids": [
+            "mail_cancellation_ops",
+            "mail_meeting_request_maya",
+            "mail_escalation_customer",
+            "mail_attachment_briefing"
+          ],
+          "risk_level": "low",
+          "requires_confirmation": false
+        }
+      },
+      {
+        "id": "workflow_reflection_workflow_meeting_request_maya",
+        "scenario_id": "workflow_meeting_request_maya",
+        "lesson_type": "workflow_success",
+        "generalizes": true,
+        "recommended_artifact": "skill",
+        "summary": "Parsed Maya's meeting request, found a conflict-free slot, and drafted an invite response.",
+        "workflow_plan": {
+          "id": "workflow_meeting_request_maya",
+          "workflow_type": "meeting_request",
+          "summary": "Parsed Maya's meeting request, found a conflict-free slot, and drafted an invite response.",
+          "drafts": [
+            {
+              "id": "draft_invite_maya",
+              "to": [
+                "maya@example.com"
+              ],
+              "subject": "Re: Can we meet about the launch plan?",
+              "body": "I found Tue May 5 at 10:00 AM EDT for 30 minutes and drafted a calendar invite for confirmation.",
+              "thread_id": "thread_launch_plan",
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_meeting_request_maya",
+                "cal_create_launch_plan_with_maya"
+              ]
+            }
+          ],
+          "calendar_mutations": [
+            {
+              "id": "cal_create_launch_plan_with_maya",
+              "operation": "create",
+              "title": "Launch plan with Maya",
+              "start": "2026-05-05 10:00:00-04:00",
+              "end": "2026-05-05 10:30:00-04:00",
+              "attendees": [
+                "maya@example.com"
+              ],
+              "calendar_id": "work",
+              "event_id": null,
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_meeting_request_maya"
+              ]
+            }
+          ],
+          "safety_decisions": [
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            },
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            }
+          ],
+          "audit_events": [
+            {
+              "id": "audit_1_cal_create_launch_plan_with_maya",
+              "action_type": "calendar_create",
+              "action_id": "cal_create_launch_plan_with_maya",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_meeting_request_maya"
+              ]
+            },
+            {
+              "id": "audit_2_draft_invite_maya",
+              "action_type": "email_draft",
+              "action_id": "draft_invite_maya",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_meeting_request_maya",
+                "cal_create_launch_plan_with_maya"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "mail_meeting_request_maya"
+          ],
+          "risk_level": "medium",
+          "requires_confirmation": true
+        }
+      },
+      {
+        "id": "workflow_reflection_workflow_cancellation_ops",
+        "scenario_id": "workflow_cancellation_ops",
+        "lesson_type": "workflow_success",
+        "generalizes": true,
+        "recommended_artifact": "skill",
+        "summary": "Detected the cancellation request, proposed cancelling Ops review, and drafted a notification.",
+        "workflow_plan": {
+          "id": "workflow_cancellation_ops",
+          "workflow_type": "cancellation",
+          "summary": "Detected the cancellation request, proposed cancelling Ops review, and drafted a notification.",
+          "drafts": [
+            {
+              "id": "draft_ops_cancel_notice",
+              "to": [
+                "dana@example.com"
+              ],
+              "subject": "Ops review cancellation",
+              "body": "Jordan asked to cancel today's Ops review. I drafted the calendar cancellation and this participant notice for confirmation.",
+              "thread_id": "thread_ops_review",
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            }
+          ],
+          "calendar_mutations": [
+            {
+              "id": "cal_cancel_evt_ops_review",
+              "operation": "cancel",
+              "title": "Ops review",
+              "start": "2026-05-01 13:00:00-04:00",
+              "end": "2026-05-01 13:45:00-04:00",
+              "attendees": [
+                "jordan@example.com"
+              ],
+              "calendar_id": "work",
+              "event_id": "evt_ops_review",
+              "requires_confirmation": true,
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            }
+          ],
+          "safety_decisions": [
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            },
+            {
+              "allowed": false,
+              "mode": "dry_run",
+              "requires_confirmation": true,
+              "reason": "Dry-run only until the user explicitly confirms the action."
+            }
+          ],
+          "audit_events": [
+            {
+              "id": "audit_1_cal_cancel_evt_ops_review",
+              "action_type": "calendar_cancel",
+              "action_id": "cal_cancel_evt_ops_review",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            },
+            {
+              "id": "audit_2_draft_ops_cancel_notice",
+              "action_type": "email_draft",
+              "action_id": "draft_ops_cancel_notice",
+              "decision": {
+                "allowed": false,
+                "mode": "dry_run",
+                "requires_confirmation": true,
+                "reason": "Dry-run only until the user explicitly confirms the action."
+              },
+              "created_at": "2026-05-01T18:29:45Z",
+              "evidence_ids": [
+                "mail_cancellation_ops",
+                "evt_ops_review"
+              ]
+            }
+          ],
+          "evidence_ids": [
+            "mail_cancellation_ops",
+            "evt_ops_review"
+          ],
+          "risk_level": "high",
+          "requires_confirmation": true
+        }
+      }
+    ],
+    "generated_eval_count": 0,
+    "candidate_skill_count": 3
+  },
   "eval_validation": {
     "stable.jsonl": 3,
     "generated.jsonl": 6,
-    "heldout.jsonl": 3
+    "heldout.jsonl": 3,
+    "workflow.jsonl": 3
   },
   "session_logs": {
     "count": 43,
     "paths": [
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_next_meeting-b9edd33e.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_last_sync-3385b706.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_last_flight-d6cb9d05.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_flight_arrival_timezone-3c61d4e7.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_free_time_alex-64bc7eec.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_sarah_before_offsite-409ee89f.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_recurring_last_meeting-1a936b77.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-f1850c25.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-0094c524.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-17ac1dd5.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-8cdaec02.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-a4f5c260.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-0811eaf4.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-7605b1f1.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-e3ab54ed.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-f47c4452.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-603bd27e.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-5ebac5ff.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-6c12a4f2.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-b7fbee7b.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-9f8cbe93.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-37e60051.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-d79c03d1.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-bc19ca11.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-e17676e3.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-edadaa6c.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-343282b6.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-6b73b1ff.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-626f06e5.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-77a02bb6.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-0d508a1b.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-c7ef6c51.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-b8ff36fa.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-6a0ac3f9.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-a6310af4.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-bfc59860.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-c3ef8c3c.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-5fa77aea.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-30de423f.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-d8baa589.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-518f5e86.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-9885660b.json",
-      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-830d48ad.json"
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_next_meeting-daeb5746.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_last_sync-f58a5393.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_last_flight-ea842943.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_flight_arrival_timezone-8524b27c.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_free_time_alex-68ef66f5.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_sarah_before_offsite-20a59d68.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/prod_recurring_last_meeting-e208001f.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-d8cd7bf6.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-f9cd0fdd.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-ae772e49.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-86be8c09.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-ce2ba1c2.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-2abd811a.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-ea549c15.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-aa5d3e3b.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-b862448c.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-d394009f.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-feb92218.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-0ccb88ab.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-65af97c8.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-7c545a35.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-3e32efef.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-49a896d3.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-7de92e3b.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-e73a05b9.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-72fd6547.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-423f6fd3.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-8dccab4d.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-a27973eb.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-bb4be3fd.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-732f197b.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_next_meeting_ignores_cancelled-8137598e.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_flight_destination-460749ec.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/stable_last_sync_human_name-f6e87827.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_next_meeting-d388775d.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_sync-f629d7f7.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_last_flight-b0df0e39.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_flight_arrival_timezone-f7de691d.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_free_time_alex-874a233f.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/generated_prod_sarah_before_offsite-4f1c225f.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_recurring_last_meeting-4967dc9d.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_timezone_flight-14fc439e.json",
+      "/Users/okay/Documents/email-calendar-agent-lab/logs/sessions/heldout_sarah_not_sara-73313c91.json"
     ]
   },
   "langfuse_export": {
@@ -478,8 +976,8 @@
     "generalizable_count": 43,
     "records": [
       {
-        "id": "reflection_e5a7b16bed7f",
-        "session_id": "prod_next_meeting-b9edd33e",
+        "id": "reflection_eb8ef339bde7",
+        "session_id": "prod_next_meeting-daeb5746",
         "scenario_id": "prod_next_meeting",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -496,11 +994,11 @@
           "evt_board_prep"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_4b1aae9d4c96",
-        "session_id": "prod_last_sync-3385b706",
+        "id": "reflection_c1d49e098e42",
+        "session_id": "prod_last_sync-f58a5393",
         "scenario_id": "prod_last_sync",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -514,11 +1012,11 @@
           "mail_sync_sarah"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_f861db65758a",
-        "session_id": "prod_last_flight-d6cb9d05",
+        "id": "reflection_5d37002298af",
+        "session_id": "prod_last_flight-ea842943",
         "scenario_id": "prod_last_flight",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -532,11 +1030,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_cb9b59b93fbe",
-        "session_id": "prod_flight_arrival_timezone-3c61d4e7",
+        "id": "reflection_08947a946cae",
+        "session_id": "prod_flight_arrival_timezone-8524b27c",
         "scenario_id": "prod_flight_arrival_timezone",
         "passed": false,
         "lesson_type": "timezone_loss",
@@ -550,11 +1048,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_f92c1483f52a",
-        "session_id": "prod_free_time_alex-64bc7eec",
+        "id": "reflection_abc537953c47",
+        "session_id": "prod_free_time_alex-68ef66f5",
         "scenario_id": "prod_free_time_alex",
         "passed": false,
         "lesson_type": "ambiguous_contact",
@@ -565,11 +1063,11 @@
         "summary": "Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].",
         "evidence_ids": [],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_38c243f36fce",
-        "session_id": "prod_sarah_before_offsite-409ee89f",
+        "id": "reflection_08c3355da0fd",
+        "session_id": "prod_sarah_before_offsite-20a59d68",
         "scenario_id": "prod_sarah_before_offsite",
         "passed": false,
         "lesson_type": "bad_temporal_reasoning",
@@ -585,11 +1083,11 @@
           "evt_offsite"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_910bb5c3e3ca",
-        "session_id": "prod_recurring_last_meeting-1a936b77",
+        "id": "reflection_ff5dc2987a57",
+        "session_id": "prod_recurring_last_meeting-e208001f",
         "scenario_id": "prod_recurring_last_meeting",
         "passed": true,
         "lesson_type": "useful_success",
@@ -605,11 +1103,11 @@
           "evt_standup_30"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_9698cd89bb5d",
-        "session_id": "stable_next_meeting_ignores_cancelled-f1850c25",
+        "id": "reflection_17d7501e9ebd",
+        "session_id": "stable_next_meeting_ignores_cancelled-d8cd7bf6",
         "scenario_id": "stable_next_meeting_ignores_cancelled",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -626,11 +1124,11 @@
           "evt_board_prep"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_7ae731b4bca3",
-        "session_id": "stable_last_flight_destination-0094c524",
+        "id": "reflection_c207dd847a16",
+        "session_id": "stable_last_flight_destination-f9cd0fdd",
         "scenario_id": "stable_last_flight_destination",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -644,11 +1142,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_ae10891f82cd",
-        "session_id": "stable_last_sync_human_name-17ac1dd5",
+        "id": "reflection_da845efe1f0b",
+        "session_id": "stable_last_sync_human_name-ae772e49",
         "scenario_id": "stable_last_sync_human_name",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -662,11 +1160,11 @@
           "mail_sync_sarah"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_d5768a6746f6",
-        "session_id": "generated_prod_next_meeting-8cdaec02",
+        "id": "reflection_263f863fbfaf",
+        "session_id": "generated_prod_next_meeting-86be8c09",
         "scenario_id": "generated_prod_next_meeting",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -683,11 +1181,11 @@
           "evt_board_prep"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_9a0b2377dc59",
-        "session_id": "generated_prod_last_sync-a4f5c260",
+        "id": "reflection_a09e854683ce",
+        "session_id": "generated_prod_last_sync-ce2ba1c2",
         "scenario_id": "generated_prod_last_sync",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -701,11 +1199,11 @@
           "mail_sync_sarah"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_24c823d95e89",
-        "session_id": "generated_prod_last_flight-0811eaf4",
+        "id": "reflection_ef5dc1e6c78d",
+        "session_id": "generated_prod_last_flight-2abd811a",
         "scenario_id": "generated_prod_last_flight",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -719,11 +1217,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_9cb012389686",
-        "session_id": "generated_prod_flight_arrival_timezone-7605b1f1",
+        "id": "reflection_0c8c51bce49c",
+        "session_id": "generated_prod_flight_arrival_timezone-ea549c15",
         "scenario_id": "generated_prod_flight_arrival_timezone",
         "passed": false,
         "lesson_type": "timezone_loss",
@@ -737,11 +1235,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_f348a71d5f76",
-        "session_id": "generated_prod_free_time_alex-e3ab54ed",
+        "id": "reflection_c75ad00cd51e",
+        "session_id": "generated_prod_free_time_alex-aa5d3e3b",
         "scenario_id": "generated_prod_free_time_alex",
         "passed": false,
         "lesson_type": "ambiguous_contact",
@@ -752,11 +1250,11 @@
         "summary": "Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].",
         "evidence_ids": [],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_2c6f8b5048e8",
-        "session_id": "generated_prod_sarah_before_offsite-f47c4452",
+        "id": "reflection_276df9199451",
+        "session_id": "generated_prod_sarah_before_offsite-b862448c",
         "scenario_id": "generated_prod_sarah_before_offsite",
         "passed": false,
         "lesson_type": "bad_temporal_reasoning",
@@ -772,11 +1270,11 @@
           "evt_offsite"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_12186277b325",
-        "session_id": "heldout_recurring_last_meeting-603bd27e",
+        "id": "reflection_f9be1852f547",
+        "session_id": "heldout_recurring_last_meeting-d394009f",
         "scenario_id": "heldout_recurring_last_meeting",
         "passed": true,
         "lesson_type": "useful_success",
@@ -792,11 +1290,11 @@
           "evt_standup_30"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_8266b191ae5c",
-        "session_id": "heldout_timezone_flight-5ebac5ff",
+        "id": "reflection_921e92d68e34",
+        "session_id": "heldout_timezone_flight-feb92218",
         "scenario_id": "heldout_timezone_flight",
         "passed": false,
         "lesson_type": "timezone_loss",
@@ -810,11 +1308,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_7aec2225495d",
-        "session_id": "heldout_sarah_not_sara-6c12a4f2",
+        "id": "reflection_4d6a78b7b97a",
+        "session_id": "heldout_sarah_not_sara-0ccb88ab",
         "scenario_id": "heldout_sarah_not_sara",
         "passed": true,
         "lesson_type": "useful_success",
@@ -828,11 +1326,11 @@
           "evt_sarah_before_offsite"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_8d0af9d90390",
-        "session_id": "stable_next_meeting_ignores_cancelled-b7fbee7b",
+        "id": "reflection_c3de0a845d21",
+        "session_id": "stable_next_meeting_ignores_cancelled-65af97c8",
         "scenario_id": "stable_next_meeting_ignores_cancelled",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -849,11 +1347,11 @@
           "evt_board_prep"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_b1268de7d3de",
-        "session_id": "stable_last_flight_destination-9f8cbe93",
+        "id": "reflection_e757ef337fd8",
+        "session_id": "stable_last_flight_destination-7c545a35",
         "scenario_id": "stable_last_flight_destination",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -867,11 +1365,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_53c62c301ec5",
-        "session_id": "stable_last_sync_human_name-37e60051",
+        "id": "reflection_78c05b2d7db4",
+        "session_id": "stable_last_sync_human_name-3e32efef",
         "scenario_id": "stable_last_sync_human_name",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -885,11 +1383,11 @@
           "mail_sync_sarah"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_0d7742acae96",
-        "session_id": "generated_prod_next_meeting-d79c03d1",
+        "id": "reflection_2b7caecfe5f8",
+        "session_id": "generated_prod_next_meeting-49a896d3",
         "scenario_id": "generated_prod_next_meeting",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -906,11 +1404,11 @@
           "evt_board_prep"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_90a4e3072b12",
-        "session_id": "generated_prod_last_sync-bc19ca11",
+        "id": "reflection_4b8cd990a1af",
+        "session_id": "generated_prod_last_sync-7de92e3b",
         "scenario_id": "generated_prod_last_sync",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -924,11 +1422,11 @@
           "mail_sync_sarah"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_8bbbf7b897bd",
-        "session_id": "generated_prod_last_flight-e17676e3",
+        "id": "reflection_ee19e0a7a453",
+        "session_id": "generated_prod_last_flight-e73a05b9",
         "scenario_id": "generated_prod_last_flight",
         "passed": false,
         "lesson_type": "missing_evidence",
@@ -942,11 +1440,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_0316fc12ecf6",
-        "session_id": "generated_prod_flight_arrival_timezone-edadaa6c",
+        "id": "reflection_0f448fd0f98c",
+        "session_id": "generated_prod_flight_arrival_timezone-72fd6547",
         "scenario_id": "generated_prod_flight_arrival_timezone",
         "passed": false,
         "lesson_type": "timezone_loss",
@@ -960,11 +1458,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_84b96dede955",
-        "session_id": "generated_prod_free_time_alex-343282b6",
+        "id": "reflection_54dfd9329a3f",
+        "session_id": "generated_prod_free_time_alex-423f6fd3",
         "scenario_id": "generated_prod_free_time_alex",
         "passed": false,
         "lesson_type": "ambiguous_contact",
@@ -975,11 +1473,11 @@
         "summary": "Failure classified as ambiguous_contact: forbidden answer content present: ['You and Alex Rivera are free'].",
         "evidence_ids": [],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_9be0df9481d8",
-        "session_id": "generated_prod_sarah_before_offsite-6b73b1ff",
+        "id": "reflection_9f8935cc5135",
+        "session_id": "generated_prod_sarah_before_offsite-8dccab4d",
         "scenario_id": "generated_prod_sarah_before_offsite",
         "passed": false,
         "lesson_type": "bad_temporal_reasoning",
@@ -995,11 +1493,11 @@
           "evt_offsite"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_4054050235f4",
-        "session_id": "heldout_recurring_last_meeting-626f06e5",
+        "id": "reflection_050e650c44fd",
+        "session_id": "heldout_recurring_last_meeting-a27973eb",
         "scenario_id": "heldout_recurring_last_meeting",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1015,11 +1513,11 @@
           "evt_standup_30"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_c8a624cf3fea",
-        "session_id": "heldout_timezone_flight-77a02bb6",
+        "id": "reflection_6ab0514e3ef2",
+        "session_id": "heldout_timezone_flight-bb4be3fd",
         "scenario_id": "heldout_timezone_flight",
         "passed": false,
         "lesson_type": "timezone_loss",
@@ -1033,11 +1531,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_35b0546178eb",
-        "session_id": "heldout_sarah_not_sara-0d508a1b",
+        "id": "reflection_ef0607fada15",
+        "session_id": "heldout_sarah_not_sara-732f197b",
         "scenario_id": "heldout_sarah_not_sara",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1051,11 +1549,11 @@
           "evt_sarah_before_offsite"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_761fed6b8775",
-        "session_id": "stable_next_meeting_ignores_cancelled-c7ef6c51",
+        "id": "reflection_45e8d2a9e089",
+        "session_id": "stable_next_meeting_ignores_cancelled-8137598e",
         "scenario_id": "stable_next_meeting_ignores_cancelled",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1071,11 +1569,11 @@
           "evt_board_prep"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_26548334e595",
-        "session_id": "stable_last_flight_destination-b8ff36fa",
+        "id": "reflection_84337c3d8154",
+        "session_id": "stable_last_flight_destination-460749ec",
         "scenario_id": "stable_last_flight_destination",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1089,11 +1587,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_5e65b48a7bba",
-        "session_id": "stable_last_sync_human_name-6a0ac3f9",
+        "id": "reflection_43c0c431f713",
+        "session_id": "stable_last_sync_human_name-f6e87827",
         "scenario_id": "stable_last_sync_human_name",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1107,11 +1605,11 @@
           "mail_sync_sarah"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_0612bd65e2b2",
-        "session_id": "generated_prod_next_meeting-a6310af4",
+        "id": "reflection_48c8f3a39ac8",
+        "session_id": "generated_prod_next_meeting-d388775d",
         "scenario_id": "generated_prod_next_meeting",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1127,11 +1625,11 @@
           "evt_board_prep"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_ee681e200b46",
-        "session_id": "generated_prod_last_sync-bfc59860",
+        "id": "reflection_435a4ebed686",
+        "session_id": "generated_prod_last_sync-f629d7f7",
         "scenario_id": "generated_prod_last_sync",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1145,11 +1643,11 @@
           "mail_sync_sarah"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_1e8a70e61838",
-        "session_id": "generated_prod_last_flight-c3ef8c3c",
+        "id": "reflection_d90e6e185856",
+        "session_id": "generated_prod_last_flight-b0df0e39",
         "scenario_id": "generated_prod_last_flight",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1163,11 +1661,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_263ff4bcfa7e",
-        "session_id": "generated_prod_flight_arrival_timezone-5fa77aea",
+        "id": "reflection_91bf59b81648",
+        "session_id": "generated_prod_flight_arrival_timezone-f7de691d",
         "scenario_id": "generated_prod_flight_arrival_timezone",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1181,11 +1679,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_db41fe53dd37",
-        "session_id": "generated_prod_free_time_alex-30de423f",
+        "id": "reflection_a85926f832e5",
+        "session_id": "generated_prod_free_time_alex-874a233f",
         "scenario_id": "generated_prod_free_time_alex",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1196,11 +1694,11 @@
         "summary": "Successful trace can be distilled as useful_success pattern.",
         "evidence_ids": [],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_65b56874db80",
-        "session_id": "generated_prod_sarah_before_offsite-d8baa589",
+        "id": "reflection_946c7334ddc6",
+        "session_id": "generated_prod_sarah_before_offsite-4f1c225f",
         "scenario_id": "generated_prod_sarah_before_offsite",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1215,11 +1713,11 @@
           "evt_sarah_before_offsite"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_a4ca4fefefaa",
-        "session_id": "heldout_recurring_last_meeting-518f5e86",
+        "id": "reflection_0347a72c404a",
+        "session_id": "heldout_recurring_last_meeting-4967dc9d",
         "scenario_id": "heldout_recurring_last_meeting",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1235,11 +1733,11 @@
           "evt_standup_30"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_2e46c27596b1",
-        "session_id": "heldout_timezone_flight-9885660b",
+        "id": "reflection_a71dbb5f6e1c",
+        "session_id": "heldout_timezone_flight-14fc439e",
         "scenario_id": "heldout_timezone_flight",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1253,11 +1751,11 @@
           "mail_seattle_flight"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       },
       {
-        "id": "reflection_41f957de332a",
-        "session_id": "heldout_sarah_not_sara-830d48ad",
+        "id": "reflection_3e422fe28fb8",
+        "session_id": "heldout_sarah_not_sara-73313c91",
         "scenario_id": "heldout_sarah_not_sara",
         "passed": true,
         "lesson_type": "useful_success",
@@ -1271,7 +1769,7 @@
           "evt_sarah_before_offsite"
         ],
         "langfuse_enabled": false,
-        "created_at": "2026-05-01T17:57:51Z"
+        "created_at": "2026-05-01T18:29:45Z"
       }
     ],
     "langfuse_export": {
@@ -1285,9 +1783,9 @@
   "memory": {
     "path": "/Users/okay/Documents/email-calendar-agent-lab/memory/email_calendar_lab.sqlite",
     "counts": {
-      "sessions": 258,
-      "reflections": 258,
-      "lessons": 258,
+      "sessions": 344,
+      "reflections": 344,
+      "lessons": 344,
       "artifact_promotions": 20
     },
     "fts_enabled": true
@@ -1295,7 +1793,7 @@
   "candidate_skills": [
     {
       "id": "candidate_skill_useful_success_prod_recurring_last_meeting",
-      "source_reflection_id": "reflection_910bb5c3e3ca",
+      "source_reflection_id": "reflection_ff5dc2987a57",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to prod_recurring_last_meeting",
@@ -1311,7 +1809,7 @@
     },
     {
       "id": "candidate_skill_useful_success_heldout_recurring_last_meeting",
-      "source_reflection_id": "reflection_12186277b325",
+      "source_reflection_id": "reflection_f9be1852f547",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to heldout_recurring_last_meeting",
@@ -1327,7 +1825,7 @@
     },
     {
       "id": "candidate_skill_useful_success_heldout_sarah_not_sara",
-      "source_reflection_id": "reflection_7aec2225495d",
+      "source_reflection_id": "reflection_4d6a78b7b97a",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to heldout_sarah_not_sara",
@@ -1343,7 +1841,7 @@
     },
     {
       "id": "candidate_skill_useful_success_stable_next_meeting_ignores_cancelled",
-      "source_reflection_id": "reflection_761fed6b8775",
+      "source_reflection_id": "reflection_45e8d2a9e089",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to stable_next_meeting_ignores_cancelled",
@@ -1359,7 +1857,7 @@
     },
     {
       "id": "candidate_skill_useful_success_stable_last_flight_destination",
-      "source_reflection_id": "reflection_26548334e595",
+      "source_reflection_id": "reflection_84337c3d8154",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to stable_last_flight_destination",
@@ -1375,7 +1873,7 @@
     },
     {
       "id": "candidate_skill_useful_success_stable_last_sync_human_name",
-      "source_reflection_id": "reflection_5e65b48a7bba",
+      "source_reflection_id": "reflection_43c0c431f713",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to stable_last_sync_human_name",
@@ -1391,7 +1889,7 @@
     },
     {
       "id": "candidate_skill_useful_success_generated_prod_next_meeting",
-      "source_reflection_id": "reflection_0612bd65e2b2",
+      "source_reflection_id": "reflection_48c8f3a39ac8",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to generated_prod_next_meeting",
@@ -1407,7 +1905,7 @@
     },
     {
       "id": "candidate_skill_useful_success_generated_prod_last_sync",
-      "source_reflection_id": "reflection_ee681e200b46",
+      "source_reflection_id": "reflection_435a4ebed686",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to generated_prod_last_sync",
@@ -1423,7 +1921,7 @@
     },
     {
       "id": "candidate_skill_useful_success_generated_prod_last_flight",
-      "source_reflection_id": "reflection_1e8a70e61838",
+      "source_reflection_id": "reflection_d90e6e185856",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to generated_prod_last_flight",
@@ -1439,7 +1937,7 @@
     },
     {
       "id": "candidate_skill_useful_success_generated_prod_flight_arrival_timezone",
-      "source_reflection_id": "reflection_263ff4bcfa7e",
+      "source_reflection_id": "reflection_91bf59b81648",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to generated_prod_flight_arrival_timezone",
@@ -1455,7 +1953,7 @@
     },
     {
       "id": "candidate_skill_useful_success_generated_prod_free_time_alex",
-      "source_reflection_id": "reflection_db41fe53dd37",
+      "source_reflection_id": "reflection_a85926f832e5",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to generated_prod_free_time_alex",
@@ -1471,7 +1969,7 @@
     },
     {
       "id": "candidate_skill_useful_success_generated_prod_sarah_before_offsite",
-      "source_reflection_id": "reflection_65b56874db80",
+      "source_reflection_id": "reflection_946c7334ddc6",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to generated_prod_sarah_before_offsite",
@@ -1487,7 +1985,7 @@
     },
     {
       "id": "candidate_skill_useful_success_heldout_timezone_flight",
-      "source_reflection_id": "reflection_2e46c27596b1",
+      "source_reflection_id": "reflection_a71dbb5f6e1c",
       "title": "Recovered Pattern: Useful Success",
       "lesson_type": "useful_success",
       "trigger": "Similar scenario to heldout_timezone_flight",

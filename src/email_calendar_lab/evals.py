@@ -94,14 +94,33 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def validate_eval_files(paths: tuple[Path, ...]) -> dict[str, int]:
     required = {"id", "query", "expected_contains", "category", "expected_tools"}
     generated_required = required | {"lifecycle", "expected_evidence_ids", "origin_run_id", "root_cause"}
+    workflow_required = {
+        "id",
+        "query",
+        "expected_workflow_type",
+        "expected_evidence_ids",
+        "expected_action_types",
+        "forbidden_side_effects",
+    }
     counts = {}
     for path in paths:
         rows = load_jsonl(path)
         for index, row in enumerate(rows, start=1):
-            required_keys = generated_required if path.name == "generated.jsonl" else required
+            if path.name == "generated.jsonl":
+                required_keys = generated_required
+            elif path.name == "workflow.jsonl":
+                required_keys = workflow_required
+            else:
+                required_keys = required
             missing = required_keys - set(row)
             if missing:
                 raise ValueError(f"{path}:{index} missing required keys: {sorted(missing)}")
+            if path.name == "workflow.jsonl":
+                if not isinstance(row["expected_evidence_ids"], list):
+                    raise ValueError(f"{path}:{index} expected_evidence_ids must be a list")
+                if not isinstance(row["expected_action_types"], list):
+                    raise ValueError(f"{path}:{index} expected_action_types must be a list")
+                continue
             if not isinstance(row["expected_contains"], list):
                 raise ValueError(f"{path}:{index} expected_contains must be a list")
             if path.name == "generated.jsonl" and row.get("lifecycle") != "candidate":

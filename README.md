@@ -44,6 +44,7 @@ Outputs:
 
 - `logs/run_latest.json`: tool calls, answers, failures, generated evals, before/after scores, decision.
 - `evals/generated.jsonl`: evals derived from observed production-like failures.
+- `evals/workflow.jsonl`: deterministic workflow eval contracts for dry-run assistant plans.
 - `evals/stable.jsonl`: promoted regression evals.
 - `evals/heldout.jsonl`: anti-overfitting checks.
 - `prompts/current.md`: accepted prompt/harness rules.
@@ -62,6 +63,9 @@ Outputs:
 - `memory.py`: local SQLite memory for sessions, reflections, lessons, and artifact promotions.
 - `skills.py`: skill library, skill matching, and candidate skill mining.
 - `dspy_gepa.py`: optional DSPy/GEPA bridge that prepares prompt/skill/tool artifacts and Actionable Side Information.
+- `email_agent.py`, `calendar_agent.py`, `workflow_agent.py`, `orchestrator.py`: local specialist agents for priority inbox, scheduling intelligence, and dry-run workflows.
+- `safety.py`: confirmation gate and audit log for proposed email/calendar side effects.
+- `workflow_evals.py`: deterministic workflow evals and safety metrics.
 - `evolution.py`: deterministic GEPA-like self-evolution runner, DSPy/GEPA bridge status, and promotion decisions.
 - `subagents.py`: local trace evaluator, eval factory, and improvement proposer.
 - `tools.py`: mocked Gmail search, Calendar search, free/busy, and evidence IDs.
@@ -94,7 +98,8 @@ Latest run:
 default eval backend: langfuse
 production discovery: 1/7 passed
 generated evals: 6
-eval validation: {'stable.jsonl': 3, 'generated.jsonl': 6, 'heldout.jsonl': 3}
+workflow evals: 3/3 passed
+eval validation: {'stable.jsonl': 3, 'generated.jsonl': 6, 'heldout.jsonl': 3, 'workflow.jsonl': 3}
 session logs: 43
 langfuse export: {'backend': 'langfuse', 'default_eval_backend': True, ...}
 reflections: 43
@@ -108,6 +113,8 @@ accepted: improved generated+stable eval score without heldout regression
 ```
 
 The generated evals cover cancelled events, attendees vs senders, flight destination parsing, source time zones, ambiguous Alex contacts, and “last before offsite” temporal reasoning. Stable and held-out evals separately cover promoted regressions, recurring meetings, source time zones, and Sarah/Sara-style contact ambiguity.
+
+The workflow slice adds richer email/calendar models and three dry-run workflows: priority inbox summary, meeting request to proposed invite, and cancellation to proposed calendar update plus notification draft. Workflow evals assert expected evidence, proposed action types, audit events, and zero unauthorized side effects.
 
 ## Reflective Loop
 

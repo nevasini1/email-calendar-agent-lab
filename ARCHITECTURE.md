@@ -22,7 +22,8 @@ email-calendar-agent-lab/
 ├── evals/
 │   ├── generated.jsonl
 │   ├── heldout.jsonl
-│   └── stable.jsonl
+│   ├── stable.jsonl
+│   └── workflow.jsonl
 ├── logs/
 │   ├── run_latest.json
 │   └── sessions/
@@ -44,22 +45,29 @@ email-calendar-agent-lab/
 │   └── temporal_calendar_reasoning.md
 └── src/email_calendar_lab/
     ├── agent.py
+    ├── calendar_agent.py
+    ├── email_agent.py
     ├── evals.py
     ├── evolution.py
     ├── fixtures.py
     ├── harness.py
     ├── langfuse_exporter.py
     ├── memory.py
+    ├── memory_reflector_agent.py
     ├── models.py
+    ├── orchestrator.py
     ├── providers.py
     ├── reflection.py
     ├── run_cycle.py
+    ├── safety.py
     ├── session_store.py
     ├── skills.py
     ├── subagents.py
     ├── tool_broker.py
     ├── tools.py
-    └── validate_evals.py
+    ├── validate_evals.py
+    ├── workflow_agent.py
+    └── workflow_evals.py
 ```
 
 ## Runtime Entry Points
@@ -77,6 +85,7 @@ This is the primary system entry point. It runs the full lab:
 - stable/generated/heldout eval scoring,
 - rejected candidate check,
 - accepted candidate check,
+- workflow evals for dry-run email/calendar plans,
 - session trace persistence,
 - Langfuse export,
 - reflective phase,
@@ -108,13 +117,21 @@ Defines shared dataclasses:
 
 - `Contact`
 - `CalendarEvent`
+- `EmailAttachment`
 - `Email`
 - `ToolCall`
 - `Scenario`
 - `AgentRun`
 - `EvalCase`
+- `DraftEmail`
+- `CalendarMutation`
+- `SafetyDecision`
+- `AuditEvent`
+- `WorkflowPlan`
 
 These models are intentionally simple and serializable. They are the contract between tools, harness, evals, logs, reflections, and memory.
+
+The action models are dry-run by default. Proposed email sends, calendar creates, cancellations, and reschedules require confirmation and are mirrored into audit events before they can be treated as executable.
 
 ### `fixtures.py`
 
@@ -126,9 +143,23 @@ Contains all synthetic data:
 - emails,
 - production scenarios,
 - stable evals,
-- heldout evals.
+- heldout evals,
+- workflow evals.
 
 This file is the mocked production world. No real Gmail or Calendar account is used.
+
+### Specialist Agents
+
+The first expansion slice adds deterministic local agents that sit beside the original harness:
+
+- `email_agent.py`: priority inbox scoring, thread summaries, attachment date extraction, and sentiment escalation drafts.
+- `calendar_agent.py`: multi-calendar availability, smart slots, recurrence conflict detection, and mutation proposals.
+- `workflow_agent.py`: end-to-end dry-run plans for priority inbox, meeting requests, cancellations, and weekly review.
+- `orchestrator.py`: routes natural-language workflow requests to the specialist agents.
+- `memory_reflector_agent.py`: converts workflow results into lightweight reflection records for eval/skill mining.
+- `safety.py`: central confirmation gate and audit event recorder.
+
+All workflow side effects are represented as `WorkflowPlan` objects. The mocked system can propose drafts and calendar mutations, but it does not send email or mutate calendars unless the safety gate is explicitly switched to confirmed mode.
 
 ### `tools.py`
 

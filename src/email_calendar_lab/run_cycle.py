@@ -24,6 +24,7 @@ from .memory import MemoryStore
 from .reflection import ReflectivePhase
 from .session_store import SessionStore
 from .skills import SkillMiner
+from .workflow_evals import WORKFLOW_EVALS, run_workflow_evals
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_EVAL_BACKEND = "langfuse"
@@ -39,6 +40,7 @@ def main() -> None:
         directory.mkdir(parents=True, exist_ok=True)
 
     current = BASELINE_CONFIG
+    workflow_reliability = run_workflow_evals()
     production_results = run_suite_results(current, PRODUCTION_SCENARIOS)
     production_runs = [result.run for result in production_results]
     generated = failures_to_evals(production_runs, PRODUCTION_SCENARIOS)
@@ -80,7 +82,10 @@ def main() -> None:
     write_jsonl(eval_dir / "stable.jsonl", [scenario_to_eval_row(scenario) for scenario in STABLE_EVALS])
     write_jsonl(eval_dir / "heldout.jsonl", [scenario_to_eval_row(scenario) for scenario in HELDOUT_EVALS])
     write_jsonl(eval_dir / "generated.jsonl", [asdict(case) for case in generated])
-    validation = validate_eval_files((eval_dir / "stable.jsonl", eval_dir / "generated.jsonl", eval_dir / "heldout.jsonl"))
+    write_jsonl(eval_dir / "workflow.jsonl", [asdict(case) for case in WORKFLOW_EVALS])
+    validation = validate_eval_files(
+        (eval_dir / "stable.jsonl", eval_dir / "generated.jsonl", eval_dir / "heldout.jsonl", eval_dir / "workflow.jsonl")
+    )
 
     (prompt_dir / "baseline.md").write_text(prompt_text(BASELINE_CONFIG))
     (prompt_dir / "rejected_candidate.md").write_text(prompt_text(rejected_candidate))
@@ -118,7 +123,9 @@ def main() -> None:
             eval_case.first_seen_at = reflection.created_at
             eval_case.promotion_status = "quarantined"
     write_jsonl(eval_dir / "generated.jsonl", [asdict(case) for case in generated])
-    validation = validate_eval_files((eval_dir / "stable.jsonl", eval_dir / "generated.jsonl", eval_dir / "heldout.jsonl"))
+    validation = validate_eval_files(
+        (eval_dir / "stable.jsonl", eval_dir / "generated.jsonl", eval_dir / "heldout.jsonl", eval_dir / "workflow.jsonl")
+    )
     candidate_skills = SkillMiner().mine(reflections)
     evolution_summary = EvolutionRunner().run(
         reflections,
@@ -162,6 +169,7 @@ def main() -> None:
             "generated_eval_count": len(generated),
             "generated_evals": [asdict(case) for case in generated],
         },
+        "workflow_reliability": workflow_reliability,
         "eval_validation": validation,
         "session_logs": {
             "count": len(session_paths),
@@ -250,6 +258,10 @@ def print_summary(log: dict) -> None:
     print(f"default eval backend: {log['default_eval']['backend']}")
     print(f"production discovery: {discovery['passed']}/{discovery['total']} passed")
     print(f"generated evals: {log['production_failure_discovery']['generated_eval_count']}")
+    print(
+        "workflow evals: "
+        f"{log['workflow_reliability']['score']['passed']}/{log['workflow_reliability']['score']['total']} passed"
+    )
     print(f"eval validation: {log['eval_validation']}")
     print(f"session logs: {log['session_logs']['count']}")
     print(f"langfuse export: {log['langfuse_export']}")
