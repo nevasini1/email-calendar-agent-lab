@@ -1,0 +1,192 @@
+{
+  "id": "prod_model_sarah_offsite_and_calendar-b27ae5b1",
+  "scenario_id": "prod_model_sarah_offsite_and_calendar",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup"
+    ],
+    "skill_summaries": [
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+      "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows."
+    ]
+  },
+  "started_at": "2026-05-02T19:13:14Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup"
+        ],
+        "skill_summaries": [
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+          "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Sarah agenda offsite",
+          "after": "2026-04-24 00:00:00-04:00",
+          "before": "2026-05-08 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "offsite",
+          "time_min": "2026-04-24 00:00:00-04:00",
+          "time_max": "2026-05-08 00:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_offsite"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I found a related calendar event for Sarah: **\u201cLeadership offsite\u201d** on **2026-05-02 from 9:00 AM to 4:00 PM ET** at **Hudson Loft**.  \n\nI didn\u2019t find any email matching **\u201cSarah agenda offsite\u201d** in the searched window."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Sarah sync agenda']",
+        "root_cause": "time_zones",
+        "expected_evidence_ids": [
+          "mail_sync_sarah",
+          "evt_offsite"
+        ],
+        "loaded_skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "Sarah agenda offsite",
+        "after": "2026-04-24 00:00:00-04:00",
+        "before": "2026-05-08 00:00:00-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "offsite",
+        "time_min": "2026-04-24 00:00:00-04:00",
+        "time_max": "2026-05-08 00:00:00-04:00",
+        "attendee": "sarah@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "evt_offsite"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Sarah sync agenda']",
+    "root_cause": "time_zones",
+    "expected_evidence_ids": [
+      "mail_sync_sarah",
+      "evt_offsite"
+    ],
+    "loaded_skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "prod_model_sarah_offsite_and_calendar",
+    "query": "Find Sarah's agenda email and any related calendar event around the offsite.",
+    "answer": "I found a related calendar event for Sarah: **\u201cLeadership offsite\u201d** on **2026-05-02 from 9:00 AM to 4:00 PM ET** at **Hudson Loft**.  \n\nI didn\u2019t find any email matching **\u201cSarah agenda offsite\u201d** in the searched window.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Sarah agenda offsite",
+          "after": "2026-04-24 00:00:00-04:00",
+          "before": "2026-05-08 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "offsite",
+          "time_min": "2026-04-24 00:00:00-04:00",
+          "time_max": "2026-05-08 00:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_offsite"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Sarah sync agenda']",
+    "root_cause": "time_zones"
+  }
+}

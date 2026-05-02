@@ -1,0 +1,106 @@
+{
+  "id": "heldout_recurring_last_meeting-db9fbeff",
+  "scenario_id": "heldout_recurring_last_meeting",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "temporal_calendar_reasoning"
+    ],
+    "skill_summaries": [
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+    ]
+  },
+  "started_at": "2026-05-02T16:52:35Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "temporal_calendar_reasoning"
+        ],
+        "skill_summaries": [
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I answered quickly without checking email or calendar evidence."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Team standup', 'Apr 30']",
+        "root_cause": "recurring_meetings",
+        "expected_evidence_ids": [
+          "evt_standup_30"
+        ],
+        "loaded_skill_ids": [
+          "temporal_calendar_reasoning"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Team standup', 'Apr 30']",
+    "root_cause": "recurring_meetings",
+    "expected_evidence_ids": [
+      "evt_standup_30"
+    ],
+    "loaded_skill_ids": [
+      "temporal_calendar_reasoning"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "heldout_recurring_last_meeting",
+    "query": "What was my last recurring team meeting?",
+    "answer": "I answered quickly without checking email or calendar evidence.",
+    "tool_calls": [],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Team standup', 'Apr 30']",
+    "root_cause": "recurring_meetings"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "id": "heldout_timezone_flight-32d37030",
+  "scenario_id": "heldout_timezone_flight",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "include_cancelled_context",
+      "prefer_attendees_over_senders",
+      "extract_flight_airports",
+      "keep_timezone_labels",
+      "ask_contact_disambiguation",
+      "choose_last_before_anchor",
+      "handle_recurring_instances"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "flight_email_parsing"
+    ],
+    "skill_summaries": [
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+    ]
+  },
+  "started_at": "2026-05-02T17:48:42Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "include_cancelled_context",
+          "prefer_attendees_over_senders",
+          "extract_flight_airports",
+          "keep_timezone_labels",
+          "ask_contact_disambiguation",
+          "choose_last_before_anchor",
+          "handle_recurring_instances"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "flight_email_parsing"
+        ],
+        "skill_summaries": [
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight arrived arrival landed itinerary confirmation",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "boarding pass flight arrival itinerary airline",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I couldn\u2019t find any flight-related email records to determine your last flight\u2019s arrival time."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['11:35 AM PT']",
+        "root_cause": "time_zones",
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "loaded_skill_ids": [
+          "flight_email_parsing"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "flight arrived arrival landed itinerary confirmation",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": null
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "boarding pass flight arrival itinerary airline",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": null
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['11:35 AM PT']",
+    "root_cause": "time_zones",
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ],
+    "loaded_skill_ids": [
+      "flight_email_parsing"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "heldout_timezone_flight",
+    "query": "What time did my last flight arrive?",
+    "answer": "I couldn\u2019t find any flight-related email records to determine your last flight\u2019s arrival time.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight arrived arrival landed itinerary confirmation",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "boarding pass flight arrival itinerary airline",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['11:35 AM PT']",
+    "root_cause": "time_zones"
+  }
+}

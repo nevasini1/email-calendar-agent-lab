@@ -1,0 +1,316 @@
+{
+  "id": "generated_prod_recurring_last_meeting-e40e8711",
+  "scenario_id": "generated_prod_recurring_last_meeting",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "temporal_calendar_reasoning"
+    ],
+    "skill_summaries": [
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+    ]
+  },
+  "started_at": "2026-05-02T17:46:55Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "temporal_calendar_reasoning"
+        ],
+        "skill_summaries": [
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "team meeting",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "meeting",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "team",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 4,
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "recurring",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "weekly",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "Your last recurring team meeting was **Team standup** on **2026-04-30 at 9:30 AM - 9:45 AM**."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Apr 30']",
+        "root_cause": "recurring_meetings",
+        "expected_evidence_ids": [
+          "evt_standup_30"
+        ],
+        "loaded_skill_ids": [
+          "temporal_calendar_reasoning"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "team meeting",
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "meeting",
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "team",
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 4,
+      "evidence_ids": [
+        "evt_standup_27",
+        "evt_standup_28",
+        "evt_standup_29",
+        "evt_standup_30"
+      ]
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "recurring",
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "weekly",
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Apr 30']",
+    "root_cause": "recurring_meetings",
+    "expected_evidence_ids": [
+      "evt_standup_30"
+    ],
+    "loaded_skill_ids": [
+      "temporal_calendar_reasoning"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_recurring_last_meeting",
+    "query": "What was my last recurring team meeting?",
+    "answer": "Your last recurring team meeting was **Team standup** on **2026-04-30 at 9:30 AM - 9:45 AM**.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "team meeting",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "meeting",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "team",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 4,
+        "evidence_ids": [
+          "evt_standup_27",
+          "evt_standup_28",
+          "evt_standup_29",
+          "evt_standup_30"
+        ]
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "recurring",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "weekly",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Apr 30']",
+    "root_cause": "recurring_meetings"
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "id": "generated_prod_last_flight-26bacec2",
+  "scenario_id": "generated_prod_last_flight",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-nano",
+  "prompt_bundle": {
+    "model": "gpt-5.4-nano",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "tool_args_complete",
+      "avoid_duplicate_tool_calls",
+      "use_query_template_fields",
+      "timezone_default_if_missing",
+      "require_range_for_before_after",
+      "verify_expected_content"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "flight_email_parsing",
+      "temporal_calendar_reasoning"
+    ],
+    "skill_summaries": [
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary.",
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+    ]
+  },
+  "started_at": "2026-05-02T19:09:14Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-nano",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "tool_args_complete",
+          "avoid_duplicate_tool_calls",
+          "use_query_template_fields",
+          "timezone_default_if_missing",
+          "require_range_for_before_after",
+          "verify_expected_content"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "flight_email_parsing",
+          "temporal_calendar_reasoning"
+        ],
+        "skill_summaries": [
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary.",
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight itinerary ticket boarding",
+          "after": "2025-01-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "airline boarding pass confirmation flight",
+          "after": "2025-01-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I couldn\u2019t find any recent flight/boarding-pass or itinerary emails in your inbox using the available search.  \n\nIf you tell me the airline, approximate date, or the name in the confirmation email, I can narrow the search and identify the departure/arrival locations."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['SFO']",
+        "root_cause": "flight_emails",
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "loaded_skill_ids": [
+          "flight_email_parsing",
+          "temporal_calendar_reasoning"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "flight itinerary ticket boarding",
+        "after": "2025-01-01 00:00:00-04:00",
+        "before": "2026-05-02 00:00:00-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "airline boarding pass confirmation flight",
+        "after": "2025-01-01 00:00:00-04:00",
+        "before": "2026-05-02 00:00:00-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['SFO']",
+    "root_cause": "flight_emails",
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ],
+    "loaded_skill_ids": [
+      "flight_email_parsing",
+      "temporal_calendar_reasoning"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_last_flight",
+    "query": "Where was my last flight?",
+    "answer": "I couldn\u2019t find any recent flight/boarding-pass or itinerary emails in your inbox using the available search.  \n\nIf you tell me the airline, approximate date, or the name in the confirmation email, I can narrow the search and identify the departure/arrival locations.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight itinerary ticket boarding",
+          "after": "2025-01-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "airline boarding pass confirmation flight",
+          "after": "2025-01-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['SFO']",
+    "root_cause": "flight_emails"
+  }
+}

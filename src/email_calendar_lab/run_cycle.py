@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
 from .agent import BASELINE_CONFIG
+from .pipeline_progress import emit
 from .dspy_gepa import DspyGepaBridge
 from .evals import (
+    eval_case_signature,
     eval_cases_to_scenarios,
     failures_to_evals,
+    load_eval_cases,
+    merge_generated_eval_cases,
     run_suite_results,
     run_to_dict,
     score_runs,
@@ -17,20 +22,46 @@ from .evals import (
     write_jsonl,
 )
 from .evolution import EvolutionRunner
-from .fixtures import HELDOUT_EVALS, PRODUCTION_SCENARIOS, STABLE_EVALS
-from .improvement import acceptance_decision, prompt_text, propose_candidate, propose_rejected_candidate
+from .production_model_scenarios import resolve_heldout_scenarios, resolve_production_scenarios, resolve_stable_scenarios
+from .improvement import (
+    acceptance_decision,
+    config_to_dict,
+    load_current_config,
+    prompt_text,
+    propose_candidate,
+    propose_rejected_candidate,
+    write_current_config,
+)
 from .langfuse_exporter import LangfuseSessionExporter
 from .memory import MemoryStore
 from .reflection import ReflectivePhase
+from .run_history import append_run_history_line, build_run_history_entry
 from .session_store import SessionStore
 from .skills import SkillMiner
+from .subagents import TraceEvaluator
 from .workflow_evals import WORKFLOW_EVALS, run_workflow_evals
 
 ROOT = Path(__file__).resolve().parents[2]
+# Eval/trace backend label for run logs; actual export is Langfuse when keys are present.
 DEFAULT_EVAL_BACKEND = "langfuse"
 
 
+def _load_env_file(path: Path) -> None:
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
 def main() -> None:
+    _load_env_file(ROOT / ".env")
+    _load_env_file(ROOT / ".env.langfuse.local")
     eval_dir = ROOT / "evals"
     log_dir = ROOT / "logs"
     prompt_dir = ROOT / "prompts"
@@ -39,48 +70,141 @@ def main() -> None:
     for directory in (eval_dir, log_dir, prompt_dir):
         directory.mkdir(parents=True, exist_ok=True)
 
-    current = BASELINE_CONFIG
+    current, current_config_source = load_current_config(prompt_dir, BASELINE_CONFIG)
+    emit("starting", step=1, message="Starting cycle — workflow slice …")
+    emit(
+        "config_load",
+        step=1,
+        message="Loaded current prompt config for this iteration",
+        detail={"source": current_config_source, "prompt_rules": list(current.prompt_rules)},
+    )
+    emit("workflow_run", step=1, message="Running workflow JSONL evals …")
     workflow_reliability = run_workflow_evals()
-    production_results = run_suite_results(current, PRODUCTION_SCENARIOS)
+    emit(
+        "workflow",
+        step=1,
+        message="Workflow evals finished",
+        detail=dict(workflow_reliability.get("score", {})),
+    )
+    production_scenarios, production_scenario_source = resolve_production_scenarios()
+    stable_scenarios, stable_scenario_source = resolve_stable_scenarios()
+    heldout_scenarios, heldout_scenario_source = resolve_heldout_scenarios()
+
+    emit(
+        "production_run",
+        step=2,
+        message=f"Running {len(production_scenarios)} production-like scenarios ({production_scenario_source}) …",
+    )
+    production_results = run_suite_results(current, production_scenarios)
     production_runs = [result.run for result in production_results]
-    generated = failures_to_evals(production_runs, PRODUCTION_SCENARIOS)
-    generated_scenarios = eval_cases_to_scenarios(generated)
-
-    eval_suite = (*STABLE_EVALS, *generated_scenarios)
-    current_eval_results = run_suite_results(current, eval_suite)
-    current_eval_runs = [result.run for result in current_eval_results]
-    current_heldout_results = run_suite_results(current, HELDOUT_EVALS)
-    current_heldout_runs = [result.run for result in current_heldout_results]
-
-    rejected_candidate = propose_rejected_candidate(current)
-    rejected_eval_results = run_suite_results(rejected_candidate, eval_suite)
-    rejected_eval_runs = [result.run for result in rejected_eval_results]
-    rejected_heldout_results = run_suite_results(rejected_candidate, HELDOUT_EVALS)
-    rejected_heldout_runs = [result.run for result in rejected_heldout_results]
-    rejected_score = score_runs(rejected_eval_runs)
-    rejected_heldout = score_runs(rejected_heldout_runs)
-    rejected_accepted, rejected_decision = acceptance_decision(
-        score_runs(current_eval_runs),
-        rejected_score,
-        score_runs(current_heldout_runs),
-        rejected_heldout,
+    trace_evaluator = TraceEvaluator()
+    production_scenario_by_id = {scenario.id: scenario for scenario in production_scenarios}
+    for run in production_runs:
+        scenario = production_scenario_by_id.get(run.scenario_id)
+        if scenario is None:
+            continue
+        run.root_cause = trace_evaluator.evaluate(run, scenario).root_cause
+    emit(
+        "production",
+        step=2,
+        message="Production scenarios evaluated",
+        detail=dict(score_runs(production_runs, scenario_catalog=production_scenarios)),
+    )
+    fresh_generated = failures_to_evals(production_runs, production_scenarios)
+    fresh_generated_signatures = {eval_case_signature(case) for case in fresh_generated}
+    carried_generated = load_eval_cases(eval_dir / "generated.jsonl")
+    generated = merge_generated_eval_cases(carried_generated, fresh_generated)
+    active_generated = [case for case in generated if case.promotion_status != "rejected"]
+    generated_scenarios = eval_cases_to_scenarios(active_generated)
+    emit(
+        "generated_evals",
+        step=2,
+        message="Failures converted and merged into generated.jsonl rows",
+        detail={
+            "fresh_generated_eval_count": len(fresh_generated),
+            "carried_generated_eval_count": len(carried_generated),
+            "generated_eval_count": len(generated),
+            "active_generated_eval_count": len(active_generated),
+        },
     )
 
+    eval_suite = (*stable_scenarios, *generated_scenarios)
+    emit(
+        "baseline_suite",
+        step=3,
+        message=(
+            f"Scoring baseline on stable ∪ generated (stable={stable_scenario_source}) "
+            f"and held-out ({heldout_scenario_source}) …"
+        ),
+    )
+    current_eval_results = run_suite_results(current, eval_suite)
+    current_eval_runs = [result.run for result in current_eval_results]
+    current_heldout_results = run_suite_results(current, heldout_scenarios)
+    current_heldout_runs = [result.run for result in current_heldout_results]
+
+    current_score = score_runs(current_eval_runs, scenario_catalog=eval_suite)
+    emit(
+        "suite_baseline",
+        step=3,
+        message="Baseline scored on stable ∪ generated",
+        detail=dict(current_score),
+    )
+
+    rejected_candidate = propose_rejected_candidate(current)
+    emit("rejected_suite", step=4, message="Scoring weak variant on suite + held-out …")
+    rejected_eval_results = run_suite_results(rejected_candidate, eval_suite)
+    rejected_eval_runs = [result.run for result in rejected_eval_results]
+    rejected_heldout_results = run_suite_results(rejected_candidate, heldout_scenarios)
+    rejected_heldout_runs = [result.run for result in rejected_heldout_results]
+    rejected_score = score_runs(rejected_eval_runs, scenario_catalog=eval_suite)
+    rejected_heldout = score_runs(rejected_heldout_runs, scenario_catalog=heldout_scenarios)
+    rejected_accepted, rejected_decision = acceptance_decision(
+        score_runs(current_eval_runs, scenario_catalog=eval_suite),
+        rejected_score,
+        score_runs(current_heldout_runs, scenario_catalog=heldout_scenarios),
+        rejected_heldout,
+    )
+    emit(
+        "sanity_gate",
+        step=4,
+        message="Sanity gate (intentionally worse candidate)",
+        detail={"accepted": rejected_accepted, "decision": rejected_decision},
+    )
+
+    emit("candidate_propose", step=5, message="Proposing candidate from production failures …")
     candidate = propose_candidate(current, [run for run in production_runs if not run.passed])
+    emit("candidate_suite", step=5, message="Scoring candidate on suite + held-out …")
     candidate_eval_results = run_suite_results(candidate, eval_suite)
     candidate_eval_runs = [result.run for result in candidate_eval_results]
-    candidate_heldout_results = run_suite_results(candidate, HELDOUT_EVALS)
+    candidate_heldout_results = run_suite_results(candidate, heldout_scenarios)
     candidate_heldout_runs = [result.run for result in candidate_heldout_results]
 
-    current_score = score_runs(current_eval_runs)
-    candidate_score = score_runs(candidate_eval_runs)
-    current_heldout = score_runs(current_heldout_runs)
-    candidate_heldout = score_runs(candidate_heldout_runs)
+    candidate_score = score_runs(candidate_eval_runs, scenario_catalog=eval_suite)
+    current_heldout = score_runs(current_heldout_runs, scenario_catalog=heldout_scenarios)
+    candidate_heldout = score_runs(candidate_heldout_runs, scenario_catalog=heldout_scenarios)
     accepted, decision = acceptance_decision(current_score, candidate_score, current_heldout, candidate_heldout)
+    emit(
+        "candidate_scored",
+        step=5,
+        message="Candidate vs baseline — scoring complete",
+        detail={
+            "baseline_eval": dict(current_score),
+            "candidate_eval": dict(candidate_score),
+            "accepted": accepted,
+            "decision": decision,
+        },
+    )
     final_config = candidate if accepted else current
+    emit(
+        "promotion",
+        step=6,
+        message="Promotion decision applied",
+        detail={"accepted": accepted, "final_is_candidate": accepted},
+    )
 
-    write_jsonl(eval_dir / "stable.jsonl", [scenario_to_eval_row(scenario) for scenario in STABLE_EVALS])
-    write_jsonl(eval_dir / "heldout.jsonl", [scenario_to_eval_row(scenario) for scenario in HELDOUT_EVALS])
+    emit("artifacts", step=7, message="Writing evals, prompts, sessions, Langfuse, reflection …")
+    write_jsonl(eval_dir / "stable.jsonl", [scenario_to_eval_row(scenario) for scenario in stable_scenarios])
+    write_jsonl(eval_dir / "heldout.jsonl", [scenario_to_eval_row(scenario) for scenario in heldout_scenarios])
     write_jsonl(eval_dir / "generated.jsonl", [asdict(case) for case in generated])
     write_jsonl(eval_dir / "workflow.jsonl", [asdict(case) for case in WORKFLOW_EVALS])
     validation = validate_eval_files(
@@ -91,6 +215,7 @@ def main() -> None:
     (prompt_dir / "rejected_candidate.md").write_text(prompt_text(rejected_candidate))
     (prompt_dir / "candidate.md").write_text(prompt_text(candidate))
     (prompt_dir / "current.md").write_text(prompt_text(final_config))
+    write_current_config(prompt_dir / "current.json", final_config)
     session_paths = session_store.save_many(
         [
             *production_results,
@@ -116,6 +241,8 @@ def main() -> None:
     reflections = ReflectivePhase().reflect_many(all_results, langfuse_export)
     reflection_by_scenario = {reflection.scenario_id: reflection for reflection in reflections}
     for eval_case in generated:
+        if eval_case_signature(eval_case) not in fresh_generated_signatures:
+            continue
         reflection = reflection_by_scenario.get(eval_case.origin_run_id or "")
         if reflection:
             eval_case.reflection_id = reflection.id
@@ -158,14 +285,34 @@ def main() -> None:
 
     log = {
         "run_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "runtime": {
+            "provider": all_results[0].session.provider if all_results else None,
+            "model": all_results[0].session.model if all_results else final_config.model,
+            "backend": os.getenv("EMAIL_CALENDAR_AGENT_BACKEND", "deterministic").lower().strip(),
+        },
+        "eval_suite_sources": {
+            "production": production_scenario_source,
+            "stable": stable_scenario_source,
+            "heldout": heldout_scenario_source,
+        },
         "default_eval": {
             "backend": DEFAULT_EVAL_BACKEND,
             "json_mirror_enabled": True,
             "langfuse_export": langfuse_export,
         },
+        "current_config": {
+            "source": current_config_source,
+            "loaded": config_to_dict(current),
+            "final": config_to_dict(final_config),
+        },
         "production_failure_discovery": {
-            "score": score_runs(production_runs),
+            "score": score_runs(production_runs, scenario_catalog=production_scenarios),
+            "scenario_source": production_scenario_source,
+            "scenarios": [scenario_to_eval_row(s) for s in production_scenarios],
             "runs": [run_to_dict(run) for run in production_runs],
+            "fresh_generated_eval_count": len(fresh_generated),
+            "carried_generated_eval_count": len(carried_generated),
+            "active_generated_eval_count": len(active_generated),
             "generated_eval_count": len(generated),
             "generated_evals": [asdict(case) for case in generated],
         },
@@ -219,6 +366,13 @@ def main() -> None:
         },
     }
     (log_dir / "run_latest.json").write_text(json.dumps(log, indent=2, default=str))
+    append_run_history_line(log_dir, build_run_history_entry(log))
+    emit(
+        "completed",
+        step=7,
+        message="Cycle complete — run_latest.json written",
+        detail={"accepted": accepted, "decision": decision},
+    )
     print_summary(log)
 
 
@@ -277,4 +431,3 @@ def print_summary(log: dict) -> None:
 
 if __name__ == "__main__":
     main()
-

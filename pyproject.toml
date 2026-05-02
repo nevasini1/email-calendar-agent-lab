@@ -3,12 +3,21 @@ name = "email-calendar-agent-lab"
 version = "0.1.0"
 description = "Self-improving mocked email/calendar agent reliability lab"
 requires-python = ">=3.11"
-dependencies = ["langfuse", "dspy", "gepa"]
+dependencies = [
+    "langfuse",
+    "dspy",
+    "gepa",
+    "openai>=1.40",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "jinja2>=3.1",
+]
 
 [project.scripts]
 email-calendar-lab = "email_calendar_lab.run_cycle:main"
 email-calendar-lab-eval = "email_calendar_lab.run_cycle:main"
 email-calendar-lab-validate = "email_calendar_lab.validate_evals:main"
+email-calendar-lab-ui = "email_calendar_lab.dashboard.app:main"
 
 [build-system]
 requires = ["setuptools>=69"]
@@ -16,3 +25,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+email_calendar_lab.dashboard = ["static/*", "templates/*"]

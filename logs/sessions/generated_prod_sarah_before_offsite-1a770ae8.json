@@ -1,0 +1,225 @@
+{
+  "id": "generated_prod_sarah_before_offsite-1a770ae8",
+  "scenario_id": "generated_prod_sarah_before_offsite",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-nano",
+  "prompt_bundle": {
+    "model": "gpt-5.4-nano",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "tool_args_complete",
+      "avoid_duplicate_tool_calls",
+      "use_query_template_fields",
+      "timezone_default_if_missing",
+      "require_range_for_before_after",
+      "verify_expected_content"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup",
+      "ambiguous_contact_resolution"
+    ],
+    "skill_summaries": [
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+      "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows.",
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+    ]
+  },
+  "started_at": "2026-05-02T19:09:30Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-nano",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "tool_args_complete",
+          "avoid_duplicate_tool_calls",
+          "use_query_template_fields",
+          "timezone_default_if_missing",
+          "require_range_for_before_after",
+          "verify_expected_content"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup",
+          "ambiguous_contact_resolution"
+        ],
+        "skill_summaries": [
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+          "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows.",
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "offsite",
+          "time_min": "2026-05-01 00:00:00-04:00",
+          "time_max": "2026-06-01 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_offsite"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-04-01 00:00:00-04:00",
+          "time_max": "2026-05-02 09:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "You last met **Sarah** before the offsite on **2026-04-22**, when you had **\u201cSarah roadmap review\u201d** from **2:00\u20132:45 PM (-04:00)**."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Apr 22']",
+        "root_cause": "last_before_anchor",
+        "expected_evidence_ids": [
+          "evt_offsite",
+          "evt_sarah_before_offsite"
+        ],
+        "loaded_skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup",
+          "ambiguous_contact_resolution"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "offsite",
+        "time_min": "2026-05-01 00:00:00-04:00",
+        "time_max": "2026-06-01 00:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "evt_offsite"
+      ]
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": "2026-04-01 00:00:00-04:00",
+        "time_max": "2026-05-02 09:00:00-04:00",
+        "attendee": "sarah@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 2,
+      "evidence_ids": [
+        "evt_sarah_old",
+        "evt_sarah_before_offsite"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Apr 22']",
+    "root_cause": "last_before_anchor",
+    "expected_evidence_ids": [
+      "evt_offsite",
+      "evt_sarah_before_offsite"
+    ],
+    "loaded_skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup",
+      "ambiguous_contact_resolution"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_sarah_before_offsite",
+    "query": "When did I last meet Sarah before the offsite?",
+    "answer": "You last met **Sarah** before the offsite on **2026-04-22**, when you had **\u201cSarah roadmap review\u201d** from **2:00\u20132:45 PM (-04:00)**.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "offsite",
+          "time_min": "2026-05-01 00:00:00-04:00",
+          "time_max": "2026-06-01 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_offsite"
+        ]
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-04-01 00:00:00-04:00",
+          "time_max": "2026-05-02 09:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Apr 22']",
+    "root_cause": "last_before_anchor"
+  }
+}

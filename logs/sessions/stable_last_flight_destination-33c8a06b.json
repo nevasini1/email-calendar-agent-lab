@@ -1,0 +1,82 @@
+{
+  "id": "stable_last_flight_destination-33c8a06b",
+  "scenario_id": "stable_last_flight_destination",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [],
+    "skill_summaries": []
+  },
+  "started_at": "2026-05-02T16:52:34Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [],
+        "skill_summaries": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I answered quickly without checking email or calendar evidence."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['SFO']",
+        "root_cause": "flight_emails",
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "loaded_skill_ids": []
+      }
+    }
+  ],
+  "tool_trace": [],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['SFO']",
+    "root_cause": "flight_emails",
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ],
+    "loaded_skill_ids": []
+  },
+  "final_run": {
+    "scenario_id": "stable_last_flight_destination",
+    "query": "What city did I fly to most recently?",
+    "answer": "I answered quickly without checking email or calendar evidence.",
+    "tool_calls": [],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['SFO']",
+    "root_cause": "flight_emails"
+  }
+}

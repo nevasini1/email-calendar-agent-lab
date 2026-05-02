@@ -1,0 +1,198 @@
+{
+  "id": "generated_prod_model_alex_ambiguity-4142c8b9",
+  "scenario_id": "generated_prod_model_alex_ambiguity",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "ambiguous_contact_resolution",
+      "temporal_calendar_reasoning"
+    ],
+    "skill_summaries": [
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question.",
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+    ]
+  },
+  "started_at": "2026-05-02T19:21:34Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "ambiguous_contact_resolution",
+          "temporal_calendar_reasoning"
+        ],
+        "skill_summaries": [
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question.",
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-01 10:00:00-04:00",
+          "time_max": null,
+          "attendee": "alex.chen@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_alex_1on1"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-01 10:00:00-04:00",
+          "time_max": null,
+          "attendee": "alex.rivera@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "The next meeting with Alex is with Alex Chen.\n\nMatching event: Alex Chen 1:1 on 2026-05-04 at 9:00 AM\u20139:30 AM."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Alex Rivera']",
+        "root_cause": "ambiguous_contacts",
+        "expected_evidence_ids": [
+          "evt_alex_1on1",
+          "evt_alex_rivera_recent"
+        ],
+        "loaded_skill_ids": [
+          "ambiguous_contact_resolution",
+          "temporal_calendar_reasoning"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": "2026-05-01 10:00:00-04:00",
+        "time_max": null,
+        "attendee": "alex.chen@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "evt_alex_1on1"
+      ]
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": "2026-05-01 10:00:00-04:00",
+        "time_max": null,
+        "attendee": "alex.rivera@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Alex Rivera']",
+    "root_cause": "ambiguous_contacts",
+    "expected_evidence_ids": [
+      "evt_alex_1on1",
+      "evt_alex_rivera_recent"
+    ],
+    "loaded_skill_ids": [
+      "ambiguous_contact_resolution",
+      "temporal_calendar_reasoning"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_model_alex_ambiguity",
+    "query": "I need the next meeting with Alex. Which Alex is it, and what event matches?",
+    "answer": "The next meeting with Alex is with Alex Chen.\n\nMatching event: Alex Chen 1:1 on 2026-05-04 at 9:00 AM\u20139:30 AM.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-01 10:00:00-04:00",
+          "time_max": null,
+          "attendee": "alex.chen@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_alex_1on1"
+        ]
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-01 10:00:00-04:00",
+          "time_max": null,
+          "attendee": "alex.rivera@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Alex Rivera']",
+    "root_cause": "ambiguous_contacts"
+  }
+}

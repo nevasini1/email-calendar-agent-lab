@@ -18,6 +18,10 @@ class LangfuseSessionExporter:
 
     def __init__(self) -> None:
         _load_local_env()
+        if not os.getenv("LANGFUSE_HOST"):
+            base = os.getenv("LANGFUSE_BASE_URL")
+            if base:
+                os.environ["LANGFUSE_HOST"] = base.rstrip("/")
         self.enabled = os.getenv("LANGFUSE_TRACING_ENABLED", "true").lower() not in {"0", "false", "no"}
         self.reason: str | None = None
         self.client: Any | None = None
@@ -32,7 +36,10 @@ class LangfuseSessionExporter:
             from langfuse import get_client
         except ImportError:
             self.enabled = False
-            self.reason = "langfuse package is not installed; run python3 -m pip install -e ."
+            self.reason = (
+                "langfuse package is not installed; run: python3 -m pip install langfuse "
+                "(same interpreter as run_cycle / the dashboard), or pip install -e . from the repo root"
+            )
             return
         self.client = get_client()
 
@@ -140,8 +147,9 @@ class LangfuseSessionExporter:
             return {"backend": "langfuse", "enabled": True, "exported": 0, "errors": [str(exc)]}
 
     def _export_generation(self, result: HarnessResult) -> None:
+        generation_name = "openai-agent-generation" if result.session.provider == "openai-live" else "local-agent-generation"
         with self._start_observation(
-            name="deterministic-policy",
+            name=generation_name,
             as_type="generation",
             model=result.session.model,
             input=asdict(result.session.prompt_bundle),
@@ -185,4 +193,3 @@ def _load_local_env() -> None:
             continue
         key, value = line.split("=", 1)
         os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
-

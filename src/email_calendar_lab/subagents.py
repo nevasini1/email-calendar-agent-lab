@@ -2,18 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .adaptive_reasoner import infer_root_cause, propose_prompt_rules
 from .agent import AgentConfig
 from .models import AgentRun, EvalCase, Scenario
-
-CATEGORY_RULES = {
-    "cancelled_events": "exclude_cancelled_events",
-    "attendees_vs_senders": "prefer_human_participants",
-    "flight_emails": "parse_flight_destination",
-    "ambiguous_contacts": "clarify_ambiguous_contacts",
-    "last_before_anchor": "respect_temporal_anchors",
-    "time_zones": "preserve_source_timezones",
-}
-
 
 @dataclass(frozen=True)
 class TraceDecision:
@@ -29,10 +20,11 @@ class TraceEvaluator:
 
     def evaluate(self, run: AgentRun, scenario: Scenario) -> TraceDecision:
         evidence_ids = tuple(dict.fromkeys(evidence_id for call in run.tool_calls for evidence_id in call.evidence_ids))
+        root_cause = infer_root_cause(run, scenario.category)
         return TraceDecision(
             scenario_id=run.scenario_id,
             passed=run.passed,
-            root_cause=run.root_cause or (None if run.passed else scenario.category),
+            root_cause=root_cause,
             failure_reason=run.failure_reason,
             evidence_ids=evidence_ids,
         )
@@ -80,10 +72,6 @@ class ImprovementProposer:
     """Subagent-style prompt rule proposer driven by root causes."""
 
     def propose(self, current: AgentConfig, failures: list[AgentRun]) -> AgentConfig:
-        rules = list(current.prompt_rules)
-        for failure in failures:
-            rule = CATEGORY_RULES.get(failure.root_cause or "")
-            if rule and rule not in rules:
-                rules.append(rule)
-        return AgentConfig(name=f"{current.name}+candidate", prompt_rules=tuple(rules), model=current.model)
+        rules = propose_prompt_rules(current.prompt_rules, failures)
+        return AgentConfig(name=f"{current.name}+candidate", prompt_rules=rules, model=current.model)
 

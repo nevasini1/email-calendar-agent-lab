@@ -1,0 +1,112 @@
+{
+  "id": "generated_prod_last_sync-c0e6bb7b",
+  "scenario_id": "generated_prod_last_sync",
+  "mode": "build",
+  "provider": "deterministic-local",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "deterministic-local",
+    "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup"
+    ],
+    "skill_summaries": [
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+      "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows."
+    ]
+  },
+  "started_at": "2026-05-02T16:52:34Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "deterministic-local",
+        "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions using tools, then returns only facts supported by tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup"
+        ],
+        "skill_summaries": [
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+          "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows."
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I answered quickly without checking email or calendar evidence."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Dana Kim']",
+        "root_cause": "attendees_vs_senders",
+        "expected_evidence_ids": [
+          "mail_sync_dana"
+        ],
+        "loaded_skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Dana Kim']",
+    "root_cause": "attendees_vs_senders",
+    "expected_evidence_ids": [
+      "mail_sync_dana"
+    ],
+    "loaded_skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_last_sync",
+    "query": "Who did I last sync with?",
+    "answer": "I answered quickly without checking email or calendar evidence.",
+    "tool_calls": [],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Dana Kim']",
+    "root_cause": "attendees_vs_senders"
+  }
+}

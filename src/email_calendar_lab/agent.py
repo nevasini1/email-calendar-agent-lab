@@ -38,6 +38,9 @@ class DeterministicEmailCalendarPolicy:
         calendar = broker.calendar
         q = scenario.query.lower()
 
+        if self.config.has("answer_fast_without_new_evidence"):
+            return "I answered quickly without checking email or calendar evidence."
+
         if "free time" in q and "alex" in q:
             answer = self._answer_free_time(q, calendar)
         elif ("flight" in q or "fly" in q) and ("where" in q or "city" in q):
@@ -189,4 +192,3 @@ def _missing_required_tool_args(tool_calls, required_tool_args: dict[str, dict[s
                 continue
             missing.setdefault(tool, {})[key] = expected_value
     return missing
-

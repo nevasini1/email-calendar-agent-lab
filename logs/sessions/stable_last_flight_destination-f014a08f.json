@@ -1,0 +1,336 @@
+{
+  "id": "stable_last_flight_destination-f014a08f",
+  "scenario_id": "stable_last_flight_destination",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "include_cancelled_context",
+      "prefer_attendees_over_senders",
+      "extract_flight_airports",
+      "keep_timezone_labels",
+      "ask_contact_disambiguation",
+      "choose_last_before_anchor",
+      "handle_recurring_instances"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "flight_email_parsing"
+    ],
+    "skill_summaries": [
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+    ]
+  },
+  "started_at": "2026-05-02T17:48:03Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "include_cancelled_context",
+          "prefer_attendees_over_senders",
+          "extract_flight_airports",
+          "keep_timezone_labels",
+          "ask_contact_disambiguation",
+          "choose_last_before_anchor",
+          "handle_recurring_instances"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "flight_email_parsing"
+        ],
+        "skill_summaries": [
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight boarded landed arrived itinerary ticket",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Delta United American Southwest flight confirmation",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "flight",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "travel",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "airport",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "itinerary hotel boarding pass",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I couldn\u2019t find any flight, travel, airport, or itinerary records in email or calendar, so I can\u2019t tell which city you most recently flew to."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['SFO']",
+        "root_cause": "flight_emails",
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "loaded_skill_ids": [
+          "flight_email_parsing"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "flight boarded landed arrived itinerary ticket",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": null
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "Delta United American Southwest flight confirmation",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": null
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "flight",
+        "time_min": "2026-01-01 00:00:00-04:00",
+        "time_max": "2026-05-02 00:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "travel",
+        "time_min": "2026-01-01 00:00:00-04:00",
+        "time_max": "2026-05-02 00:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "airport",
+        "time_min": "2026-01-01 00:00:00-04:00",
+        "time_max": "2026-05-02 00:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "itinerary hotel boarding pass",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": null
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['SFO']",
+    "root_cause": "flight_emails",
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ],
+    "loaded_skill_ids": [
+      "flight_email_parsing"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "stable_last_flight_destination",
+    "query": "What city did I fly to most recently?",
+    "answer": "I couldn\u2019t find any flight, travel, airport, or itinerary records in email or calendar, so I can\u2019t tell which city you most recently flew to.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight boarded landed arrived itinerary ticket",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Delta United American Southwest flight confirmation",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "flight",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "travel",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "airport",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "itinerary hotel boarding pass",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['SFO']",
+    "root_cause": "flight_emails"
+  }
+}

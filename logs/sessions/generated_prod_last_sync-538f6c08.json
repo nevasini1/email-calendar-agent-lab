@@ -1,0 +1,196 @@
+{
+  "id": "generated_prod_last_sync-538f6c08",
+  "scenario_id": "generated_prod_last_sync",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "explicit_search_query",
+      "include_cancelled_items",
+      "latest_before_anchor",
+      "disambiguate_contacts",
+      "preserve_timezone_context",
+      "extract_required_entities"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "ambiguous_contact_resolution"
+    ],
+    "skill_summaries": [
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+    ]
+  },
+  "started_at": "2026-05-02T19:16:39Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "explicit_search_query",
+          "include_cancelled_items",
+          "latest_before_anchor",
+          "disambiguate_contacts",
+          "preserve_timezone_context",
+          "extract_required_entities"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "ambiguous_contact_resolution"
+        ],
+        "skill_summaries": [
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "sync with",
+          "after": "2026-04-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "sync",
+          "time_min": "2026-04-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_sarah_old"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "It looks like your last sync was with Sarah."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Dana Kim']",
+        "root_cause": "attendees_vs_senders",
+        "expected_evidence_ids": [
+          "mail_sync_dana"
+        ],
+        "loaded_skill_ids": [
+          "ambiguous_contact_resolution"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "sync with",
+        "after": "2026-04-01 00:00:00-04:00",
+        "before": "2026-05-02 00:00:00-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "sync",
+        "time_min": "2026-04-01 00:00:00-04:00",
+        "time_max": "2026-05-02 00:00:00-04:00",
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "evt_sarah_old"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Dana Kim']",
+    "root_cause": "attendees_vs_senders",
+    "expected_evidence_ids": [
+      "mail_sync_dana"
+    ],
+    "loaded_skill_ids": [
+      "ambiguous_contact_resolution"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_last_sync",
+    "query": "Who did I last sync with?",
+    "answer": "It looks like your last sync was with Sarah.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "sync with",
+          "after": "2026-04-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "sync",
+          "time_min": "2026-04-01 00:00:00-04:00",
+          "time_max": "2026-05-02 00:00:00-04:00",
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_sarah_old"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Dana Kim']",
+    "root_cause": "attendees_vs_senders"
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "id": "generated_prod_model_flight_email_jfk_sfo-56528c76",
+  "scenario_id": "generated_prod_model_flight_email_jfk_sfo",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-nano",
+  "prompt_bundle": {
+    "model": "gpt-5.4-nano",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "flight_email_parsing"
+    ],
+    "skill_summaries": [
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+    ]
+  },
+  "started_at": "2026-05-02T19:08:09Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-nano",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "flight_email_parsing"
+        ],
+        "skill_summaries": [
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "JFK SFO flight receipt",
+          "after": null,
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_sfo_flight"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "The flight receipt for **JFK to SFO** is in an email with the subject: **\u201cYour flight receipt: JFK to SFO\u201d** (sent from **receipts@airline.example**)."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing required tool args: {'gmail.search_emails': {'query': 'JFK to SFO flight receipt', 'from': 'receipts@airline.example'}}",
+        "root_cause": "flight_emails",
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "loaded_skill_ids": [
+          "flight_email_parsing"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "JFK SFO flight receipt",
+        "after": null,
+        "before": null
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "mail_sfo_flight"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing required tool args: {'gmail.search_emails': {'query': 'JFK to SFO flight receipt', 'from': 'receipts@airline.example'}}",
+    "root_cause": "flight_emails",
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ],
+    "loaded_skill_ids": [
+      "flight_email_parsing"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_model_flight_email_jfk_sfo",
+    "query": "I need the flight receipt for JFK to SFO. What email is it in?",
+    "answer": "The flight receipt for **JFK to SFO** is in an email with the subject: **\u201cYour flight receipt: JFK to SFO\u201d** (sent from **receipts@airline.example**).",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "JFK SFO flight receipt",
+          "after": null,
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_sfo_flight"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing required tool args: {'gmail.search_emails': {'query': 'JFK to SFO flight receipt', 'from': 'receipts@airline.example'}}",
+    "root_cause": "flight_emails"
+  }
+}

@@ -12,6 +12,7 @@ The harness borrows architecture ideas from OpenCode-style agents: plan/build mo
 4. Propose prompt/harness rules from classified root causes.
 5. Re-run stable plus generated evals and a held-out set.
 6. Reject no-op or regressing candidates; accept only net improvements with no held-out category regression.
+7. Write the accepted config to `prompts/current.json` and load it as the baseline for the next cycle.
 
 ## Run
 
@@ -43,11 +44,12 @@ Langfuse is the default eval backend. If `.env.langfuse.local` or exported Langf
 Outputs:
 
 - `logs/run_latest.json`: tool calls, answers, failures, generated evals, before/after scores, decision.
-- `evals/generated.jsonl`: evals derived from observed production-like failures.
+- `evals/generated.jsonl`: carried-forward candidate evals derived from observed production-like failures.
 - `evals/workflow.jsonl`: deterministic workflow eval contracts for dry-run assistant plans.
 - `evals/stable.jsonl`: promoted regression evals.
 - `evals/heldout.jsonl`: anti-overfitting checks.
 - `prompts/current.md`: accepted prompt/harness rules.
+- `prompts/current.json`: machine-readable accepted config loaded on the next iteration.
 - `prompts/rejected_candidate.md`: rejected no-op candidate used to prove the gate.
 - `logs/sessions/*.json`: per-scenario harness sessions with provider, prompt, tool, answer, and eval steps.
 - Langfuse traces: one trace per harness session by default when local Langfuse keys are configured.
@@ -72,7 +74,7 @@ Outputs:
 - `agent.py`: deterministic email/calendar domain policy. `AgentConfig.model` defaults to `gpt-5.4-mini`, but provider metadata is owned by the harness.
 - `evals.py`: suite execution through the harness, evidence-aware scoring, JSONL validation, deduping, and failure-to-eval conversion.
 - `improvement.py`: compatibility wrapper around the subagent-style improvement proposer plus acceptance/rejection gates.
-- `run_cycle.py`: one complete eval creation plus self-improvement cycle.
+- `run_cycle.py`: one complete eval creation plus self-improvement cycle; loads the prior accepted config before scoring.
 
 ## Harness Shape
 
@@ -161,7 +163,6 @@ This keeps the agent from passing by guessing a string while using the wrong evi
 
 ## Anti-Overfitting
 
-Generated evals are not treated as truth forever by default. They start with `lifecycle="candidate"` in `generated.jsonl`, while promoted regressions live in `stable.jsonl`. Candidate changes are scored on stable plus generated evals, but acceptance also requires no overall or per-category regression on `heldout.jsonl`.
+Generated evals are not treated as truth forever by default. They start with `lifecycle="candidate"` in `generated.jsonl`, while promoted regressions live in `stable.jsonl`. New failure-derived evals are merged with carried-forward generated evals, so the next iteration keeps auto-evaluating prior failures even after the production scenario starts passing. Candidate changes are scored on stable plus generated evals, but acceptance also requires no overall or per-category regression on `heldout.jsonl`.
 
-The loop also tries a deliberately bad/no-op candidate and logs its rejection. In a larger version, generated evals should be promoted only after repeated failures, category deduping, and human or oracle validation.
-
+The loop also tries a deliberately bad evidence-skipping candidate and logs its rejection. In a larger version, generated evals should be promoted only after repeated failures, category deduping, and human or oracle validation.

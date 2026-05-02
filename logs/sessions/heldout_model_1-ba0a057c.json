@@ -1,0 +1,173 @@
+{
+  "id": "heldout_model_1-ba0a057c",
+  "scenario_id": "heldout_model_1",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "disambiguate_contacts_by_context",
+      "inspect_recurring_instances",
+      "include_recent_and_last_before_anchor",
+      "preserve_cancelled_event_evidence",
+      "use_free_busy_for_availability"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "temporal_calendar_reasoning",
+      "ambiguous_contact_resolution"
+    ],
+    "skill_summaries": [
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+    ]
+  },
+  "started_at": "2026-05-02T19:25:16Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "disambiguate_contacts_by_context",
+          "inspect_recurring_instances",
+          "include_recent_and_last_before_anchor",
+          "preserve_cancelled_event_evidence",
+          "use_free_busy_for_availability"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "temporal_calendar_reasoning",
+          "ambiguous_contact_resolution"
+        ],
+        "skill_summaries": [
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "Sarah",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": true
+        },
+        "result_count": 3,
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite",
+          "evt_sarah_cancelled"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "The most recent confirmed Sarah-related event before the current time anchor is **\u201cSarah roadmap review\u201d** on **2026-04-22 14:00\u201314:45 -04:00**.\n\nEvidence:\n- It appears in the calendar results with **status: confirmed**.\n- It is the latest confirmed Sarah event before **2026-05-01T10:00:00-04:00**.\n- A later Sarah event on **2026-04-30 16:00\u201316:30 -04:00** is present, but its status is **cancelled**, so it is not the most recent confirmed one."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['cancelled']",
+        "root_cause": "last_before_anchor",
+        "expected_evidence_ids": [
+          "evt_sarah_before_offsite"
+        ],
+        "loaded_skill_ids": [
+          "temporal_calendar_reasoning",
+          "ambiguous_contact_resolution"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "Sarah",
+        "time_min": null,
+        "time_max": "2026-05-01 10:00:00-04:00",
+        "attendee": "sarah@example.com",
+        "include_cancelled": true
+      },
+      "result_count": 3,
+      "evidence_ids": [
+        "evt_sarah_old",
+        "evt_sarah_before_offsite",
+        "evt_sarah_cancelled"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['cancelled']",
+    "root_cause": "last_before_anchor",
+    "expected_evidence_ids": [
+      "evt_sarah_before_offsite"
+    ],
+    "loaded_skill_ids": [
+      "temporal_calendar_reasoning",
+      "ambiguous_contact_resolution"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "heldout_model_1",
+    "query": "Before the current time anchor, which Sarah-related calendar event is the most recent confirmed one, and what evidence shows its status and time?",
+    "answer": "The most recent confirmed Sarah-related event before the current time anchor is **\u201cSarah roadmap review\u201d** on **2026-04-22 14:00\u201314:45 -04:00**.\n\nEvidence:\n- It appears in the calendar results with **status: confirmed**.\n- It is the latest confirmed Sarah event before **2026-05-01T10:00:00-04:00**.\n- A later Sarah event on **2026-04-30 16:00\u201316:30 -04:00** is present, but its status is **cancelled**, so it is not the most recent confirmed one.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "Sarah",
+          "time_min": null,
+          "time_max": "2026-05-01 10:00:00-04:00",
+          "attendee": "sarah@example.com",
+          "include_cancelled": true
+        },
+        "result_count": 3,
+        "evidence_ids": [
+          "evt_sarah_old",
+          "evt_sarah_before_offsite",
+          "evt_sarah_cancelled"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['cancelled']",
+    "root_cause": "last_before_anchor"
+  }
+}

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -21,11 +21,15 @@ def run_suite_results(config: AgentConfig, scenarios: tuple[Scenario, ...]) -> l
     return [harness.execute(scenario, mode="build") for scenario in scenarios]
 
 
-def score_runs(runs: list[AgentRun]) -> dict:
+def score_runs(runs: list[AgentRun], *, scenario_catalog: tuple[Scenario, ...] | None = None) -> dict:
     passed = sum(run.passed for run in runs)
     total = len(runs)
     by_category: dict[str, dict[str, int]] = {}
-    scenario_lookup = {scenario.id: scenario for scenario in (*PRODUCTION_SCENARIOS, *STABLE_EVALS, *HELDOUT_EVALS)}
+    if scenario_catalog is None:
+        catalog: tuple[Scenario, ...] = (*PRODUCTION_SCENARIOS, *STABLE_EVALS, *HELDOUT_EVALS)
+    else:
+        catalog = scenario_catalog
+    scenario_lookup = {scenario.id: scenario for scenario in catalog}
     for run in runs:
         category = scenario_lookup[run.scenario_id].category if run.scenario_id in scenario_lookup else infer_category(run.scenario_id)
         bucket = by_category.setdefault(category, {"passed": 0, "total": 0})
@@ -35,6 +39,10 @@ def score_runs(runs: list[AgentRun]) -> dict:
 
 
 def infer_category(scenario_id: str) -> str:
+    if scenario_id.startswith("prod_model_") or scenario_id.startswith("stable_model_") or scenario_id.startswith(
+        "heldout_model_"
+    ):
+        return "general"
     if "next_meeting" in scenario_id or "cancelled" in scenario_id:
         return "cancelled_events"
     if "last_sync" in scenario_id:
@@ -54,6 +62,63 @@ def infer_category(scenario_id: str) -> str:
 
 def failures_to_evals(runs: list[AgentRun], scenarios: tuple[Scenario, ...]) -> list[EvalCase]:
     return EvalFactory().from_failures(runs, scenarios)
+
+
+def load_eval_cases(path: Path) -> list[EvalCase]:
+    if not path.is_file():
+        return []
+    return [eval_case_from_row(row) for row in load_jsonl(path)]
+
+
+def eval_case_from_row(row: dict[str, Any]) -> EvalCase:
+    return EvalCase(
+        id=str(row["id"]),
+        query=str(row["query"]),
+        expected_contains=_tuple_of_str(row.get("expected_contains")),
+        category=str(row["category"]),
+        source_failure=str(row.get("source_failure") or "unknown"),
+        expected_tools=_tuple_of_str(row.get("expected_tools")),
+        expected_evidence_ids=_tuple_of_str(row.get("expected_evidence_ids")),
+        forbidden_contains=_tuple_of_str(row.get("forbidden_contains")),
+        required_tool_args=_tool_args(row.get("required_tool_args")),
+        lifecycle=row.get("lifecycle", "candidate"),
+        origin_run_id=row.get("origin_run_id"),
+        root_cause=row.get("root_cause"),
+        reflection_id=row.get("reflection_id"),
+        lesson_type=row.get("lesson_type"),
+        promotion_status=row.get("promotion_status", "quarantined"),
+        first_seen_at=row.get("first_seen_at"),
+        seen_count=int(row.get("seen_count") or 1),
+    )
+
+
+def merge_generated_eval_cases(existing: list[EvalCase], fresh: list[EvalCase]) -> list[EvalCase]:
+    merged: dict[tuple[str, str, tuple[str, ...]], EvalCase] = {}
+    order: list[tuple[str, str, tuple[str, ...]]] = []
+    for case in existing:
+        signature = eval_case_signature(case)
+        if signature not in merged:
+            order.append(signature)
+        merged[signature] = case
+    for case in fresh:
+        signature = eval_case_signature(case)
+        previous = merged.get(signature)
+        if previous is None:
+            merged[signature] = case
+            order.append(signature)
+            continue
+        merged[signature] = replace(
+            previous,
+            source_failure=case.source_failure or previous.source_failure,
+            origin_run_id=case.origin_run_id or previous.origin_run_id,
+            root_cause=case.root_cause or previous.root_cause,
+            seen_count=max(previous.seen_count + 1, case.seen_count),
+        )
+    return [merged[signature] for signature in order]
+
+
+def eval_case_signature(case: EvalCase) -> tuple[str, str, tuple[str, ...]]:
+    return (case.query.strip().lower(), case.category, case.expected_evidence_ids)
 
 
 def eval_cases_to_scenarios(evals: list[EvalCase]) -> tuple[Scenario, ...]:
@@ -134,3 +199,18 @@ def run_to_dict(run: AgentRun) -> dict:
     data["tool_calls"] = [asdict(call) for call in run.tool_calls]
     return data
 
+
+def _tuple_of_str(raw: Any) -> tuple[str, ...]:
+    if not isinstance(raw, list):
+        return ()
+    return tuple(str(item) for item in raw if isinstance(item, str))
+
+
+def _tool_args(raw: Any) -> dict[str, dict[str, Any]]:
+    if not isinstance(raw, dict):
+        return {}
+    args: dict[str, dict[str, Any]] = {}
+    for tool, spec in raw.items():
+        if isinstance(tool, str) and isinstance(spec, dict):
+            args[tool] = dict(spec)
+    return args

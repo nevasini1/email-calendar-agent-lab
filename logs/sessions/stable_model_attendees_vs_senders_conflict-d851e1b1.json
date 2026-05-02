@@ -1,0 +1,215 @@
+{
+  "id": "stable_model_attendees_vs_senders_conflict-d851e1b1",
+  "scenario_id": "stable_model_attendees_vs_senders_conflict",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-nano",
+  "prompt_bundle": {
+    "model": "gpt-5.4-nano",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup",
+      "flight_email_parsing",
+      "ambiguous_contact_resolution"
+    ],
+    "skill_summaries": [
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+      "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows.",
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary.",
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+    ]
+  },
+  "started_at": "2026-05-02T19:07:26Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-nano",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup",
+          "flight_email_parsing",
+          "ambiguous_contact_resolution"
+        ],
+        "skill_summaries": [
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`.",
+          "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows.",
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary.",
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-01 10:00:00-04:00",
+          "time_max": null,
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 4,
+        "evidence_ids": [
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "from:jordan@example.com OR jordan@example.com",
+          "after": "2026-05-01 10:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "The earliest upcoming **confirmed** event after NOW is **\u201cOps review\u201d** starting **2026-05-01 13:00 (-04:00)**. The meeting attendee is **Jordan Lee** at **jordan@example.com**.\n\nI also checked for a **sync email** from **jordan@example.com**, and found **no matching emails**."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Sarah roadmap review', 'sarah@example.com', 'Sarah sync agenda']",
+        "root_cause": "attendees_vs_senders",
+        "expected_evidence_ids": [
+          "evt_sarah_before_offsite",
+          "mail_sync_sarah"
+        ],
+        "loaded_skill_ids": [
+          "temporal_calendar_reasoning",
+          "free_busy_lookup",
+          "flight_email_parsing",
+          "ambiguous_contact_resolution"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": "2026-05-01 10:00:00-04:00",
+        "time_max": null,
+        "attendee": null,
+        "include_cancelled": false
+      },
+      "result_count": 4,
+      "evidence_ids": [
+        "evt_ops_review",
+        "evt_offsite",
+        "evt_alex_1on1",
+        "evt_board_prep"
+      ]
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "from:jordan@example.com OR jordan@example.com",
+        "after": "2026-05-01 10:00:00-04:00",
+        "before": null
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Sarah roadmap review', 'sarah@example.com', 'Sarah sync agenda']",
+    "root_cause": "attendees_vs_senders",
+    "expected_evidence_ids": [
+      "evt_sarah_before_offsite",
+      "mail_sync_sarah"
+    ],
+    "loaded_skill_ids": [
+      "temporal_calendar_reasoning",
+      "free_busy_lookup",
+      "flight_email_parsing",
+      "ambiguous_contact_resolution"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "stable_model_attendees_vs_senders_conflict",
+    "query": "Which person appears as a meeting attendee on the earliest upcoming confirmed event after NOW, and what is the attendee email address? Also check if there is a sync email from that same person.",
+    "answer": "The earliest upcoming **confirmed** event after NOW is **\u201cOps review\u201d** starting **2026-05-01 13:00 (-04:00)**. The meeting attendee is **Jordan Lee** at **jordan@example.com**.\n\nI also checked for a **sync email** from **jordan@example.com**, and found **no matching emails**.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-01 10:00:00-04:00",
+          "time_max": null,
+          "attendee": null,
+          "include_cancelled": false
+        },
+        "result_count": 4,
+        "evidence_ids": [
+          "evt_ops_review",
+          "evt_offsite",
+          "evt_alex_1on1",
+          "evt_board_prep"
+        ]
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "from:jordan@example.com OR jordan@example.com",
+          "after": "2026-05-01 10:00:00-04:00",
+          "before": null
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Sarah roadmap review', 'sarah@example.com', 'Sarah sync agenda']",
+    "root_cause": "attendees_vs_senders"
+  }
+}

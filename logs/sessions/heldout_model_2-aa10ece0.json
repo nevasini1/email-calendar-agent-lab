@@ -1,0 +1,213 @@
+{
+  "id": "heldout_model_2-aa10ece0",
+  "scenario_id": "heldout_model_2",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "flight_email_parsing"
+    ],
+    "skill_summaries": [
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+    ]
+  },
+  "started_at": "2026-05-02T19:23:41Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "flight_email_parsing"
+        ],
+        "skill_summaries": [
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Seattle trip flight receipt BOS SEA",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-12-31 23:59:59-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Seattle receipt flight",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-12-31 23:59:59-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "BOS SEA receipt",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-12-31 23:59:59-04:00"
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_seattle_flight"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "The flight receipt email is:\n\n- **Subject:** \u201cYour flight receipt: BOS to SEA\u201d\n- **Sender:** `receipts@airline.example`\n\nThat subject and sender identify it as the BOS \u2192 SEA flight receipt."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null,
+        "expected_evidence_ids": [
+          "mail_seattle_flight"
+        ],
+        "loaded_skill_ids": [
+          "flight_email_parsing"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "Seattle trip flight receipt BOS SEA",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": "2026-12-31 23:59:59-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "Seattle receipt flight",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": "2026-12-31 23:59:59-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "BOS SEA receipt",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": "2026-12-31 23:59:59-04:00"
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "mail_seattle_flight"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null,
+    "expected_evidence_ids": [
+      "mail_seattle_flight"
+    ],
+    "loaded_skill_ids": [
+      "flight_email_parsing"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "heldout_model_2",
+    "query": "Find the flight receipt email for the Seattle trip, and identify the subject and sender that prove it is the BOS to SEA flight receipt.",
+    "answer": "The flight receipt email is:\n\n- **Subject:** \u201cYour flight receipt: BOS to SEA\u201d\n- **Sender:** `receipts@airline.example`\n\nThat subject and sender identify it as the BOS \u2192 SEA flight receipt.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Seattle trip flight receipt BOS SEA",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-12-31 23:59:59-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Seattle receipt flight",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-12-31 23:59:59-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "BOS SEA receipt",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-12-31 23:59:59-04:00"
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_seattle_flight"
+        ]
+      }
+    ],
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null
+  }
+}

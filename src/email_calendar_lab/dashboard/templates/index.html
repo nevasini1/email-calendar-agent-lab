@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Email · Calendar Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/dashboard.css?v=35" />
+</head>
+<body data-langfuse-url="{{ langfuse_url }}" data-root="{{ project_root }}">
+  <script>
+    if (window.location.protocol === "file:") {
+      document.body.innerHTML = `
+        <main style="max-width: 760px; margin: 64px auto; padding: 24px; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.5; color: #e5edf8; background: #111c2d; border: 1px solid #34506f; border-radius: 8px;">
+          <h1 style="margin-top: 0;">Open the dashboard through the app server</h1>
+          <p>This file is a Jinja template. Opened with <code>file://</code>, it cannot call the local APIs, render template variables, or show real run history.</p>
+          <p>Use <a style="color: #8fc7ff;" href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a> instead.</p>
+        </main>
+      `;
+      throw new Error("Dashboard template opened via file://; use http://127.0.0.1:8765/");
+    }
+  </script>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <h1>Email + Calendar agent lab</h1>
+        <p class="sub">Self-improvement cycle · mocked tools · Langfuse traces · JSON mirror</p>
+      </div>
+      <div class="toolbar">
+        <span id="job-badge" class="badge">idle</span>
+        <button type="button" class="primary" id="btn-run">Run full pipeline</button>
+        <button type="button" class="ghost" id="btn-refresh">Refresh data</button>
+        <a class="ghost" id="link-langfuse" href="{{ langfuse_url }}" target="_blank" rel="noopener">Open Langfuse</a>
+      </div>
+    </header>
+
+    <div id="metrics" class="grid"></div>
+
+    <section class="section spec-section">
+      <h2>Autonomous reliability lab</h2>
+      <p class="subtle">
+        This panel maps the running project to the assignment criteria. Every count below is read from local artifacts: fixtures, eval JSONL, run history, prompts, and session traces.
+      </p>
+      <div id="spec-readout"></div>
+    </section>
+
+    <section class="section">
+      <h2>Run history — baseline vs candidate by stage</h2>
+      <p class="subtle">
+        Each finished pipeline appends one line to <code>logs/run_history.jsonl</code> on this machine.
+        Charts show up to <strong>10</strong> recent live OpenAI runs (real data only). Metrics use <strong>passed/total</strong> (workflow, production @ baseline, suite &amp; held-out before vs after candidate).
+      </p>
+      <p id="run-history-meta" class="subtle"></p>
+      <div id="run-sample-filter"></div>
+      <div id="run-truth-strip"></div>
+      <div class="chart-grid-2">
+        <div class="chart-card">
+          <h3>Stage pass rates by run</h3>
+          <div class="chart-canvas-wrap"><canvas id="chart-stage-grouped" aria-label="Grouped stage pass rates"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Suite &amp; held-out score (0–1)</h3>
+          <p class="subtle suite-line-caption">
+            Baseline = solid; candidate = dashed + larger markers. When scores tie (promotion keeps baseline), candidate lines sit under baseline in Canvas — we <strong>nudge the candidate trace up slightly</strong> so both show; hover shows the real score and notes “tied”.
+          </p>
+          <div class="chart-canvas-wrap"><canvas id="chart-suite-lines" aria-label="Suite score trajectory"></canvas></div>
+        </div>
+      </div>
+      <div id="category-delta-card" class="chart-card chart-card-wide">
+        <h3>Suite passes by category — baseline vs candidate (run history)</h3>
+        <p class="category-delta-lede subtle">
+          When <code>logs/run_history.jsonl</code> has rows, this chart lists retained runs: each row is <strong>that run’s date × one suite category that actually existed</strong> in stable ∪ generated for that cycle (no phantom categories from other runs). Paired amber/coral bars show pass rate 0–100% in that bucket; gray labels show <code>passed/total · %</code>. If there is no history yet, it falls back to the <strong>latest snapshot only</strong>.
+        </p>
+        <div class="chart-canvas-wrap chart-canvas-tall"><canvas id="chart-category-delta" aria-label="Category delta chart"></canvas></div>
+        <div id="category-delta-extras" class="category-delta-extras"></div>
+      </div>
+      <div id="run-history-table"></div>
+    </section>
+
+    <section class="section">
+      <h2>Trace → reflection → auto-eval pipeline</h2>
+      <p class="subtle">
+        These charts are built from <code>logs/run_history.jsonl</code>. They show how traces become reflections, how failures become generated evals, and whether the candidate earned promotion.
+      </p>
+      <div id="auto-eval-explainer"></div>
+      <div class="chart-grid-2">
+        <div class="chart-card">
+          <h3>Trace and artifact counts</h3>
+          <div class="chart-canvas-wrap"><canvas id="chart-trace-funnel" aria-label="Trace to eval artifact counts"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Promotion gate deltas</h3>
+          <div class="chart-canvas-wrap"><canvas id="chart-gate-deltas" aria-label="Suite and heldout gate deltas"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Per-run improvement loop</h2>
+      <p class="subtle">
+        This is a literal ledger from <code>logs/run_history.jsonl</code>: loaded config, failure mining, candidate scoring, guardrail decision, and reflection artifacts for each retained run.
+      </p>
+      <div id="run-loop-ledger"></div>
+    </section>
+
+    <section class="section">
+      <h2>Langfuse ingest</h2>
+      <div id="langfuse-ingest"></div>
+    </section>
+
+    <section class="section cycle-banner">
+      <h2>Self-improvement cycle</h2>
+      <p class="subtle">
+        Every full pipeline run walks these stages in order. Counts and gates refresh automatically after each run finishes.
+      </p>
+      <div id="cycle-flow" class="cycle-flow"></div>
+    </section>
+
+    <section class="section">
+      <h2>Pipeline log</h2>
+      <div id="pipeline-log" class="logbox">No run in progress yet.</div>
+    </section>
+
+    <section class="section">
+      <h2>Production discovery</h2>
+      <div id="production-table"></div>
+    </section>
+
+    <section class="section">
+      <h2>Self-improvement gate</h2>
+      <div id="improvement-panel"></div>
+    </section>
+
+    <section class="section">
+      <h2>Workflow evals</h2>
+      <div id="workflow-panel"></div>
+    </section>
+
+    <section class="section">
+      <h2>Recent sessions <span class="cat-pill" id="session-count"></span></h2>
+      <div id="sessions-table"></div>
+    </section>
+  </div>
+
+  <div class="modal-bg" id="modal-bg" aria-hidden="true">
+    <div class="modal">
+      <header>
+        <strong id="modal-title">Session</strong>
+        <button type="button" class="ghost" id="modal-close">Close</button>
+      </header>
+      <pre id="modal-json"></pre>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/static/dashboard.js?v=39"></script>
+</body>
+</html>

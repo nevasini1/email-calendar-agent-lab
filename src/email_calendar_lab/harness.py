@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+import os
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime
 from typing import Any, Literal
 from uuid import uuid4
 
 from .agent import AgentConfig, DeterministicEmailCalendarPolicy, score_answer
 from .models import AgentRun, Scenario
-from .providers import DeterministicProvider, ModelProvider, PromptBundle
+from .providers import DeterministicProvider, ModelProvider, OpenAILiveProvider, PromptBundle
 from .skills import SkillLibrary
 from .tool_broker import ToolBroker
 
@@ -50,8 +51,13 @@ class HarnessCore:
     """Core agent/session runner, separated from CLI and eval orchestration."""
 
     def __init__(self, config: AgentConfig, provider: ModelProvider | None = None) -> None:
+        backend = os.environ.get("EMAIL_CALENDAR_AGENT_BACKEND", "deterministic").lower().strip()
+        if backend == "openai":
+            lm = os.environ.get("OPENAI_MODEL", "gpt-5.4-mini")
+            config = replace(config, model=lm)
+        self._backend = backend
         self.config = config
-        self.provider = provider or DeterministicProvider(model=config.model)
+        self.provider = provider or (OpenAILiveProvider(model=config.model) if backend == "openai" else DeterministicProvider(model=config.model))
 
     def execute(self, scenario: Scenario, mode: AgentMode = "build") -> HarnessResult:
         broker = ToolBroker()
@@ -76,6 +82,10 @@ class HarnessCore:
 
         if mode == "plan":
             answer = self._plan_answer(scenario, broker)
+        elif self._backend == "openai":
+            from .openai_llm_agent import answer_with_openai
+
+            answer = answer_with_openai(scenario, broker, self.config, model=self.config.model)
         else:
             answer = DeterministicEmailCalendarPolicy(self.config).answer(scenario, broker)
 
@@ -109,4 +119,3 @@ class HarnessCore:
 
     def answer(self, scenario: Scenario) -> AgentRun:
         return self.execute(scenario, mode="build").run
-

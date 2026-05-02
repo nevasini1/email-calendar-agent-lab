@@ -1,0 +1,186 @@
+{
+  "id": "heldout_model_flights_receipts_between_two_cities-4bbe88a4",
+  "scenario_id": "heldout_model_flights_receipts_between_two_cities",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-nano",
+  "prompt_bundle": {
+    "model": "gpt-5.4-nano",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "flight_email_parsing"
+    ],
+    "skill_summaries": [
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+    ]
+  },
+  "started_at": "2026-05-02T19:07:09Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-nano",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "flight_email_parsing"
+        ],
+        "skill_summaries": [
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "receipt JFK SFO flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_sfo_flight"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "receipt BOS SEA flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_seattle_flight"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "- **Sender:** receipts@airline.example \u2014 **Subject:** *Your flight receipt: JFK to SFO*\n- **Sender:** receipts@airline.example \u2014 **Subject:** *Your flight receipt: BOS to SEA*"
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null,
+        "expected_evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ],
+        "loaded_skill_ids": [
+          "flight_email_parsing"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "receipt JFK SFO flight",
+        "after": null,
+        "before": null
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "mail_sfo_flight"
+      ]
+    },
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "receipt BOS SEA flight",
+        "after": null,
+        "before": null
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "mail_seattle_flight"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null,
+    "expected_evidence_ids": [
+      "mail_sfo_flight",
+      "mail_seattle_flight"
+    ],
+    "loaded_skill_ids": [
+      "flight_email_parsing"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "heldout_model_flights_receipts_between_two_cities",
+    "query": "List the flight receipt emails (sender and subject) that mention the routes JFK to SFO and BOS to SEA. Include only the relevant receipts.",
+    "answer": "- **Sender:** receipts@airline.example \u2014 **Subject:** *Your flight receipt: JFK to SFO*\n- **Sender:** receipts@airline.example \u2014 **Subject:** *Your flight receipt: BOS to SEA*",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "receipt JFK SFO flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_sfo_flight"
+        ]
+      },
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "receipt BOS SEA flight",
+          "after": null,
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_seattle_flight"
+        ]
+      }
+    ],
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null
+  }
+}

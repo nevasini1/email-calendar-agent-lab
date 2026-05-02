@@ -34,6 +34,7 @@ email-calendar-agent-lab/
 │   ├── baseline.md
 │   ├── candidate.md
 │   ├── current.md
+│   ├── current.json
 │   └── rejected_candidate.md
 ├── scripts/
 │   ├── run_with_langfuse.sh
@@ -407,13 +408,14 @@ Runs the full reliability lab:
 5. Bad candidate rejection.
 6. Candidate improvement run.
 7. Prompt/current artifact writing.
-8. Session JSON persistence.
-9. Langfuse export.
-10. Reflective phase.
-11. SQLite memory persistence.
-12. Candidate skill mining.
-13. Evolution decisions.
-14. `logs/run_latest.json` summary.
+8. Next-iteration config persistence.
+9. Session JSON persistence.
+10. Langfuse export.
+11. Reflective phase.
+12. SQLite memory persistence.
+13. Candidate skill mining.
+14. Evolution decisions.
+15. `logs/run_latest.json` summary.
 
 ### `validate_evals.py`
 
@@ -457,9 +459,15 @@ Candidate evals derived from production-like failures and enriched by reflection
 - `first_seen_at`
 - `seen_count`
 
+Each cycle merges fresh failure-derived evals with existing generated rows before scoring stable ∪ generated. This keeps prior failure cases in the next iteration's automatic eval suite even after the current prompt starts passing the original production probe.
+
 ### `evals/heldout.jsonl`
 
 Anti-overfitting checks. Candidate changes must not regress this set overall or by category.
+
+### `prompts/current.json`
+
+Machine-readable accepted prompt config. `run_cycle.py` loads this file first, then falls back to `prompts/current.md`, then to `BASELINE_CONFIG`. This is what makes an accepted candidate become the next iteration's evaluated baseline rather than only a written artifact.
 
 ## Logs And Memory
 
@@ -538,7 +546,7 @@ Candidate prompt/harness changes are accepted only if:
 - heldout score does not regress,
 - heldout category scores do not regress.
 
-Generated evals and candidate skills start quarantined. Promotion decisions are recorded separately from raw generation.
+Failure root causes are translated into prompt rules the deterministic policy actually recognizes, so the candidate has behavioral effect before it is evaluated. Generated evals and candidate skills start quarantined. Promotion decisions are recorded separately from raw generation.
 
 ## DSPy And GEPA
 
@@ -557,4 +565,3 @@ By default, the bridge prepares artifacts and records whether full DSPy/GEPA com
 - No model fine-tuning.
 - No remote service required for local correctness.
 - No fully automatic skill promotion without validation.
-

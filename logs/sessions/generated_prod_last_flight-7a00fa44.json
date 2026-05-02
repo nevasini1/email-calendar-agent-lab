@@ -1,0 +1,160 @@
+{
+  "id": "generated_prod_last_flight-7a00fa44",
+  "scenario_id": "generated_prod_last_flight",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "explicit_search_query",
+      "include_cancelled_items",
+      "latest_before_anchor",
+      "disambiguate_contacts",
+      "preserve_timezone_context",
+      "extract_required_entities"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "flight_email_parsing"
+    ],
+    "skill_summaries": [
+      "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+    ]
+  },
+  "started_at": "2026-05-02T19:16:43Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "explicit_search_query",
+          "include_cancelled_items",
+          "latest_before_anchor",
+          "disambiguate_contacts",
+          "preserve_timezone_context",
+          "extract_required_entities"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "flight_email_parsing"
+        ],
+        "skill_summaries": [
+          "flight_email_parsing: 1. Search Gmail for flight-related receipts or itineraries. 2. Sort by sent time and use the newest relevant itinerary."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-05-01 10:00:00-04:00"
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "Your most recent flight receipt shows a trip from JFK to SFO."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "forbidden answer content present: ['JFK']",
+        "root_cause": "flight_emails",
+        "expected_evidence_ids": [
+          "mail_sfo_flight"
+        ],
+        "loaded_skill_ids": [
+          "flight_email_parsing"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "flight",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": "2026-05-01 10:00:00-04:00"
+      },
+      "result_count": 2,
+      "evidence_ids": [
+        "mail_sfo_flight",
+        "mail_seattle_flight"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['JFK']",
+    "root_cause": "flight_emails",
+    "expected_evidence_ids": [
+      "mail_sfo_flight"
+    ],
+    "loaded_skill_ids": [
+      "flight_email_parsing"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_last_flight",
+    "query": "Where was my last flight?",
+    "answer": "Your most recent flight receipt shows a trip from JFK to SFO.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "flight",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": "2026-05-01 10:00:00-04:00"
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sfo_flight",
+          "mail_seattle_flight"
+        ]
+      }
+    ],
+    "passed": false,
+    "failure_reason": "forbidden answer content present: ['JFK']",
+    "root_cause": "flight_emails"
+  }
+}

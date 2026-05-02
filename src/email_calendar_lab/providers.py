@@ -56,3 +56,29 @@ class DeterministicProvider:
             skill_summaries=skill_summaries,
         )
 
+
+@dataclass(frozen=True)
+class OpenAILiveProvider:
+    model: str = "gpt-5.4-mini"
+    name: str = "openai-live"
+
+    def prompt_bundle(
+        self,
+        agent_name: str,
+        rules: tuple[str, ...],
+        tool_schemas: tuple[str, ...],
+        skill_ids: tuple[str, ...] = (),
+        skill_summaries: tuple[str, ...] = (),
+    ) -> PromptBundle:
+        return PromptBundle(
+            model=self.model,
+            provider=self.name,
+            system_prompt=(
+                f"{agent_name} answers email/calendar questions with live OpenAI tool-calling, "
+                "using only mocked Gmail and Calendar tool evidence."
+            ),
+            rules=rules,
+            tool_schemas=tool_schemas,
+            skill_ids=skill_ids,
+            skill_summaries=skill_summaries,
+        )

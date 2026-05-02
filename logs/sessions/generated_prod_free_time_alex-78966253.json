@@ -1,0 +1,282 @@
+{
+  "id": "generated_prod_free_time_alex-78966253",
+  "scenario_id": "generated_prod_free_time_alex",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "explicit_search_query",
+      "include_cancelled_items",
+      "latest_before_anchor",
+      "disambiguate_contacts",
+      "preserve_timezone_context",
+      "extract_required_entities"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "ambiguous_contact_resolution",
+      "free_busy_lookup",
+      "temporal_calendar_reasoning"
+    ],
+    "skill_summaries": [
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question.",
+      "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows.",
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+    ]
+  },
+  "started_at": "2026-05-02T19:16:53Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "explicit_search_query",
+          "include_cancelled_items",
+          "latest_before_anchor",
+          "disambiguate_contacts",
+          "preserve_timezone_context",
+          "extract_required_entities"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "ambiguous_contact_resolution",
+          "free_busy_lookup",
+          "temporal_calendar_reasoning"
+        ],
+        "skill_summaries": [
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question.",
+          "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows.",
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-04 00:00:00-04:00",
+          "time_max": "2026-05-11 00:00:00-04:00",
+          "attendee": "alex.chen@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_alex_1on1"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.free_busy",
+        "args": {
+          "attendee": "alex.chen@example.com",
+          "start": "2026-05-04 00:00:00-04:00",
+          "end": "2026-05-11 00:00:00-04:00"
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_alex_1on1"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-04 00:00:00-04:00",
+          "time_max": "2026-05-11 00:00:00-04:00",
+          "attendee": "alex.rivera@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.free_busy",
+        "args": {
+          "attendee": "alex.rivera@example.com",
+          "start": "2026-05-04 00:00:00-04:00",
+          "end": "2026-05-11 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I checked both Alexes next week.\n\n- Alex Chen is busy on Mon May 4 from 9:00\u20139:30 AM.\n- Alex Rivera has no busy events returned.\n\nSo, free time with Alex Chen should be any time next week except that slot. If you meant Alex Rivera, they\u2019re free all next week from the data I found."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected answer content: ['Which Alex']",
+        "root_cause": "ambiguous_contacts",
+        "expected_evidence_ids": [],
+        "loaded_skill_ids": [
+          "ambiguous_contact_resolution",
+          "free_busy_lookup",
+          "temporal_calendar_reasoning"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": "2026-05-04 00:00:00-04:00",
+        "time_max": "2026-05-11 00:00:00-04:00",
+        "attendee": "alex.chen@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "evt_alex_1on1"
+      ]
+    },
+    {
+      "tool": "calendar.free_busy",
+      "args": {
+        "attendee": "alex.chen@example.com",
+        "start": "2026-05-04 00:00:00-04:00",
+        "end": "2026-05-11 00:00:00-04:00"
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "evt_alex_1on1"
+      ]
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": null,
+        "time_min": "2026-05-04 00:00:00-04:00",
+        "time_max": "2026-05-11 00:00:00-04:00",
+        "attendee": "alex.rivera@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    },
+    {
+      "tool": "calendar.free_busy",
+      "args": {
+        "attendee": "alex.rivera@example.com",
+        "start": "2026-05-04 00:00:00-04:00",
+        "end": "2026-05-11 00:00:00-04:00"
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Which Alex']",
+    "root_cause": "ambiguous_contacts",
+    "expected_evidence_ids": [],
+    "loaded_skill_ids": [
+      "ambiguous_contact_resolution",
+      "free_busy_lookup",
+      "temporal_calendar_reasoning"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_free_time_alex",
+    "query": "Find free time with Alex next week?",
+    "answer": "I checked both Alexes next week.\n\n- Alex Chen is busy on Mon May 4 from 9:00\u20139:30 AM.\n- Alex Rivera has no busy events returned.\n\nSo, free time with Alex Chen should be any time next week except that slot. If you meant Alex Rivera, they\u2019re free all next week from the data I found.",
+    "tool_calls": [
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-04 00:00:00-04:00",
+          "time_max": "2026-05-11 00:00:00-04:00",
+          "attendee": "alex.chen@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_alex_1on1"
+        ]
+      },
+      {
+        "tool": "calendar.free_busy",
+        "args": {
+          "attendee": "alex.chen@example.com",
+          "start": "2026-05-04 00:00:00-04:00",
+          "end": "2026-05-11 00:00:00-04:00"
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "evt_alex_1on1"
+        ]
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": null,
+          "time_min": "2026-05-04 00:00:00-04:00",
+          "time_max": "2026-05-11 00:00:00-04:00",
+          "attendee": "alex.rivera@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      },
+      {
+        "tool": "calendar.free_busy",
+        "args": {
+          "attendee": "alex.rivera@example.com",
+          "start": "2026-05-04 00:00:00-04:00",
+          "end": "2026-05-11 00:00:00-04:00"
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected answer content: ['Which Alex']",
+    "root_cause": "ambiguous_contacts"
+  }
+}

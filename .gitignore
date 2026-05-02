@@ -1,5 +1,8 @@
+.env
 .env.langfuse.local
 .langfuse/
+logs/run_progress.json
 __pycache__/
 *.pyc
+*.egg-info/
 .DS_Store

@@ -1,0 +1,150 @@
+{
+  "id": "generated_prod_last_sync-e21b1ee8",
+  "scenario_id": "generated_prod_last_sync",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-nano",
+  "prompt_bundle": {
+    "model": "gpt-5.4-nano",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "answer_fast_without_new_evidence"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "free_busy_lookup"
+    ],
+    "skill_summaries": [
+      "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows."
+    ]
+  },
+  "started_at": "2026-05-02T19:07:36Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-nano",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+bad-candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "answer_fast_without_new_evidence"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "free_busy_lookup"
+        ],
+        "skill_summaries": [
+          "free_busy_lookup: 1. Resolve the attendee identity first. 2. Interpret relative dates such as next week into concrete windows."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "sync",
+          "after": "2026-04-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ]
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "You last synced with **Dana Kim** (email sent **2026-04-30 5:00 PM -04:00**)."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": true,
+        "failure_reason": null,
+        "root_cause": null,
+        "expected_evidence_ids": [
+          "mail_sync_dana"
+        ],
+        "loaded_skill_ids": [
+          "free_busy_lookup"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "sync",
+        "after": "2026-04-01 00:00:00-04:00",
+        "before": "2026-05-02 00:00:00-04:00"
+      },
+      "result_count": 2,
+      "evidence_ids": [
+        "mail_sync_dana",
+        "mail_sync_sarah"
+      ]
+    }
+  ],
+  "evaluator_decision": {
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null,
+    "expected_evidence_ids": [
+      "mail_sync_dana"
+    ],
+    "loaded_skill_ids": [
+      "free_busy_lookup"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "generated_prod_last_sync",
+    "query": "Who did I last sync with?",
+    "answer": "You last synced with **Dana Kim** (email sent **2026-04-30 5:00 PM -04:00**).",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "sync",
+          "after": "2026-04-01 00:00:00-04:00",
+          "before": "2026-05-02 00:00:00-04:00"
+        },
+        "result_count": 2,
+        "evidence_ids": [
+          "mail_sync_dana",
+          "mail_sync_sarah"
+        ]
+      }
+    ],
+    "passed": true,
+    "failure_reason": null,
+    "root_cause": null
+  }
+}

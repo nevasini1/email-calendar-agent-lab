@@ -2,13 +2,16 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
+import re
 from typing import Any
 
+from .adaptive_reasoner import judge_eval_promotion
 from .dspy_gepa import DspyGepaBridge
 from .models import EvalCase
 from .reflection import ReflectionRecord
 from .skills import CandidateSkill
-from .subagents import CATEGORY_RULES
+
+_RULE_RE = re.compile(r"^[a-z][a-z0-9_]{2,63}$")
 
 
 @dataclass(frozen=True)
@@ -42,12 +45,23 @@ class EvolutionRunner:
         heldout_safe = self._heldout_safe(current_heldout, candidate_heldout)
 
         for eval_case in candidate_evals:
-            status = "promoted" if improved and heldout_safe and eval_case.root_cause in CATEGORY_RULES else "quarantined"
-            reason = (
-                "candidate eval captures a generalizable failure and current candidate improved safely"
-                if status == "promoted"
-                else "candidate eval remains quarantined until repeated observation or stronger validation"
+            has_explained_cause = bool((eval_case.root_cause or "").strip())
+            model_promote, model_reason = judge_eval_promotion(
+                eval_case=eval_case,
+                improved=improved,
+                heldout_safe=heldout_safe,
+                candidate_score=candidate_score,
+                candidate_heldout=candidate_heldout,
             )
+            promote = bool(model_promote) if model_promote is not None else bool(improved and heldout_safe and has_explained_cause)
+            # Guardrails always apply even if model says promote.
+            if not (improved and heldout_safe and has_explained_cause):
+                promote = False
+            status = "promoted" if promote else "quarantined"
+            if status == "promoted":
+                reason = model_reason or "promoted: model signaled reusable failure and guardrails passed"
+            else:
+                reason = model_reason or "quarantined: model/guardrails require stronger validation and measurable suite gain"
             decisions.append(
                 EvolutionDecision(
                     eval_case.id,
@@ -83,9 +97,11 @@ class EvolutionRunner:
 
         prompt_variants = sorted(
             {
-                CATEGORY_RULES[reflection.root_cause]
+                f"focus_{reflection.root_cause}"
                 for reflection in reflections
-                if reflection.root_cause in CATEGORY_RULES and reflection.generalizes
+                if reflection.generalizes
+                and reflection.root_cause
+                and _RULE_RE.match(f"focus_{reflection.root_cause}")
             }
         )
         dspy_gepa = (gepa_bridge or DspyGepaBridge(log_dir=Path("logs/gepa"))).maybe_run(

@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import json
+import os
 from pathlib import Path
+import re
 from typing import TYPE_CHECKING, Any
+
+from openai import OpenAI
 
 if TYPE_CHECKING:
     from .reflection import ReflectionRecord
@@ -40,27 +45,77 @@ class CandidateSkill:
 
 
 class SkillLibrary:
-    CATEGORY_SKILLS = {
-        "cancelled_events": ("temporal_calendar_reasoning",),
-        "last_before_anchor": ("temporal_calendar_reasoning",),
-        "recurring_meetings": ("temporal_calendar_reasoning",),
-        "flight_emails": ("flight_email_parsing",),
-        "time_zones": ("flight_email_parsing",),
-        "ambiguous_contacts": ("ambiguous_contact_resolution", "free_busy_lookup"),
-        "attendees_vs_senders": ("ambiguous_contact_resolution",),
-    }
-
     def __init__(self, skill_dir: Path = SKILL_DIR) -> None:
         self.skill_dir = skill_dir
 
     def match(self, category: str, query: str) -> tuple[SkillDoc, ...]:
-        ids = list(self.CATEGORY_SKILLS.get(category, ()))
-        lowered = query.lower()
-        if "free time" in lowered and "free_busy_lookup" not in ids:
-            ids.append("free_busy_lookup")
-        if "flight" in lowered and "flight_email_parsing" not in ids:
-            ids.append("flight_email_parsing")
+        ids = self._model_skill_ids(category, query) or self._keyword_skill_ids(category, query)
         return tuple(skill for skill in (self.load(skill_id) for skill_id in ids) if skill is not None)
+
+    def _model_skill_ids(self, category: str, query: str) -> list[str] | None:
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        if not api_key:
+            return None
+        available = sorted(path.stem for path in self.skill_dir.glob("*.md"))
+        if not available:
+            return None
+        client = OpenAI(api_key=api_key, timeout=_client_timeout_seconds())
+        model = os.getenv("OPENAI_MODEL", "gpt-5.4-nano")
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Select skill ids for an email/calendar scenario. "
+                    "Return JSON: {\"skill_ids\": [ ... ]}. Choose only from provided ids."
+                ),
+            },
+            {
+                "role": "user",
+                "content": json.dumps({"category": category, "query": query, "available_skill_ids": available}),
+            },
+        ]
+        kwargs: dict[str, Any] = {"model": model, "messages": messages}
+        try:
+            kwargs["response_format"] = {"type": "json_object"}
+            resp = client.chat.completions.create(**kwargs, max_completion_tokens=600)
+        except TypeError:
+            kwargs.pop("response_format", None)
+            resp = client.chat.completions.create(**kwargs, max_tokens=600)
+        except Exception:
+            return None
+        text = (resp.choices[0].message.content or "").strip()
+        if not text:
+            return None
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            return None
+        ids = payload.get("skill_ids") if isinstance(payload, dict) else None
+        if not isinstance(ids, list):
+            return None
+        selected: list[str] = []
+        for item in ids:
+            if isinstance(item, str) and item in available and item not in selected:
+                selected.append(item)
+        return selected or None
+
+    def _keyword_skill_ids(self, category: str, query: str) -> list[str]:
+        available = sorted(path.stem for path in self.skill_dir.glob("*.md"))
+        if not available:
+            return []
+        context = f"{category} {query}".lower()
+        tokens = {tok for tok in re.findall(r"[a-z0-9_]+", context) if len(tok) >= 3}
+        scored: list[tuple[int, str]] = []
+        for skill_id in available:
+            doc = self.load(skill_id)
+            if doc is None:
+                continue
+            blob = " ".join([skill_id, doc.title, doc.trigger, doc.summary]).lower()
+            score = sum(1 for tok in tokens if tok in blob)
+            if score > 0:
+                scored.append((score, skill_id))
+        scored.sort(key=lambda x: (-x[0], x[1]))
+        return [skill_id for _score, skill_id in scored[:3]]
 
     def load(self, skill_id: str) -> SkillDoc | None:
         path = self.skill_dir / f"{skill_id}.md"
@@ -70,8 +125,7 @@ class SkillLibrary:
         title = _extract_heading(text)
         trigger = _extract_section(text, "Trigger")
         summary = " ".join(_extract_section(text, "Procedure").splitlines()[:2]).strip()
-        categories = tuple(category for category, ids in self.CATEGORY_SKILLS.items() if skill_id in ids)
-        return SkillDoc(skill_id, str(path), title, trigger, summary or trigger, categories)
+        return SkillDoc(skill_id, str(path), title, trigger, summary or trigger, ())
 
 
 class SkillMiner:
@@ -123,4 +177,15 @@ def _extract_section(text: str, section: str) -> str:
     after = text.split(marker, 1)[1]
     next_section = after.split("\n## ", 1)[0]
     return next_section.strip()
+
+
+def _client_timeout_seconds() -> float:
+    raw = os.getenv("OPENAI_CLIENT_TIMEOUT_SEC", "30").strip()
+    try:
+        value = float(raw)
+    except ValueError:
+        return 30.0
+    if value <= 0:
+        return 30.0
+    return min(value, 180.0)
 

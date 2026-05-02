@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal
 from uuid import uuid4
 
+from .adaptive_reasoner import infer_lesson_type
+
 if TYPE_CHECKING:
     from .harness import HarnessResult
 
@@ -70,21 +72,8 @@ class ReflectivePhase:
     @staticmethod
     def _lesson_type(result: "HarnessResult") -> LessonType:
         run = result.run
-        reason = (run.failure_reason or "").lower()
-        category = run.root_cause or ""
-        if run.passed:
-            return "useful_success"
-        if category == "time_zones" or "timezone" in reason or "2:35 pm et" in reason:
-            return "timezone_loss"
-        if category in {"last_before_anchor", "recurring_meetings"}:
-            return "bad_temporal_reasoning"
-        if category == "ambiguous_contacts":
-            return "ambiguous_contact"
-        if "tool args" in reason or "include_cancelled" in reason:
-            return "bad_tool_args"
-        if "evidence" in reason or "forbidden answer" in reason:
-            return "missing_evidence"
-        return "unknown_failure"
+        lesson = infer_lesson_type(run, default_category=run.root_cause)
+        return lesson  # type: ignore[return-value]
 
     @staticmethod
     def _recommended_artifact(passed: bool, lesson_type: LessonType) -> Literal[

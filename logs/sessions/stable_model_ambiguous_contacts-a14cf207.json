@@ -1,0 +1,202 @@
+{
+  "id": "stable_model_ambiguous_contacts-a14cf207",
+  "scenario_id": "stable_model_ambiguous_contacts",
+  "mode": "build",
+  "provider": "openai-live",
+  "model": "gpt-5.4-mini",
+  "prompt_bundle": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai-live",
+    "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+    "rules": [
+      "minimal_tool_use",
+      "exclude_cancelled_events",
+      "prefer_human_participants",
+      "parse_flight_destination",
+      "preserve_source_timezones",
+      "clarify_ambiguous_contacts",
+      "respect_temporal_anchors",
+      "disambiguate_contacts_by_context",
+      "inspect_recurring_instances",
+      "include_recent_and_last_before_anchor",
+      "preserve_cancelled_event_evidence",
+      "use_free_busy_for_availability"
+    ],
+    "tool_schemas": [
+      "gmail.search_emails",
+      "calendar.search_events",
+      "calendar.free_busy"
+    ],
+    "skill_ids": [
+      "ambiguous_contact_resolution",
+      "temporal_calendar_reasoning"
+    ],
+    "skill_summaries": [
+      "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question.",
+      "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+    ]
+  },
+  "started_at": "2026-05-02T19:23:51Z",
+  "steps": [
+    {
+      "kind": "prompt",
+      "payload": {
+        "model": "gpt-5.4-mini",
+        "provider": "openai-live",
+        "system_prompt": "weak-baseline+candidate+candidate answers email/calendar questions with live OpenAI tool-calling, using only mocked Gmail and Calendar tool evidence.",
+        "rules": [
+          "minimal_tool_use",
+          "exclude_cancelled_events",
+          "prefer_human_participants",
+          "parse_flight_destination",
+          "preserve_source_timezones",
+          "clarify_ambiguous_contacts",
+          "respect_temporal_anchors",
+          "disambiguate_contacts_by_context",
+          "inspect_recurring_instances",
+          "include_recent_and_last_before_anchor",
+          "preserve_cancelled_event_evidence",
+          "use_free_busy_for_availability"
+        ],
+        "tool_schemas": [
+          "gmail.search_emails",
+          "calendar.search_events",
+          "calendar.free_busy"
+        ],
+        "skill_ids": [
+          "ambiguous_contact_resolution",
+          "temporal_calendar_reasoning"
+        ],
+        "skill_summaries": [
+          "ambiguous_contact_resolution: 1. Resolve the contact name against known contacts and aliases. 2. If multiple people match, ask a clarification question.",
+          "temporal_calendar_reasoning: 1. Identify the temporal anchor such as now, next week, or an event like the offsite. 2. Query calendar events with explicit `time_min` or `time_max`."
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Dana sync notes",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_sync_dana"
+        ]
+      }
+    },
+    {
+      "kind": "tool",
+      "payload": {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "sync notes",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": null,
+          "attendee": "dana@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    },
+    {
+      "kind": "answer",
+      "payload": {
+        "answer": "I found the email from Dana:\n\n- **Subject:** Re: sync notes\n- **Sent:** 2026-04-30T17:00:00-04:00\n\nI didn\u2019t find a related calendar event matching \u201csync notes\u201d for Dana."
+      }
+    },
+    {
+      "kind": "eval",
+      "payload": {
+        "passed": false,
+        "failure_reason": "missing expected evidence ids: ['evt_standup_30']",
+        "root_cause": "ambiguous_contacts",
+        "expected_evidence_ids": [
+          "mail_sync_dana",
+          "evt_standup_30"
+        ],
+        "loaded_skill_ids": [
+          "ambiguous_contact_resolution",
+          "temporal_calendar_reasoning"
+        ]
+      }
+    }
+  ],
+  "tool_trace": [
+    {
+      "tool": "gmail.search_emails",
+      "args": {
+        "query": "Dana sync notes",
+        "after": "2026-01-01 00:00:00-04:00",
+        "before": null
+      },
+      "result_count": 1,
+      "evidence_ids": [
+        "mail_sync_dana"
+      ]
+    },
+    {
+      "tool": "calendar.search_events",
+      "args": {
+        "query": "sync notes",
+        "time_min": "2026-01-01 00:00:00-04:00",
+        "time_max": null,
+        "attendee": "dana@example.com",
+        "include_cancelled": false
+      },
+      "result_count": 0,
+      "evidence_ids": []
+    }
+  ],
+  "evaluator_decision": {
+    "passed": false,
+    "failure_reason": "missing expected evidence ids: ['evt_standup_30']",
+    "root_cause": "ambiguous_contacts",
+    "expected_evidence_ids": [
+      "mail_sync_dana",
+      "evt_standup_30"
+    ],
+    "loaded_skill_ids": [
+      "ambiguous_contact_resolution",
+      "temporal_calendar_reasoning"
+    ]
+  },
+  "final_run": {
+    "scenario_id": "stable_model_ambiguous_contacts",
+    "query": "Find the email about the sync notes from Dana and the related calendar event, using the person name Dana and only returning relevant results.",
+    "answer": "I found the email from Dana:\n\n- **Subject:** Re: sync notes\n- **Sent:** 2026-04-30T17:00:00-04:00\n\nI didn\u2019t find a related calendar event matching \u201csync notes\u201d for Dana.",
+    "tool_calls": [
+      {
+        "tool": "gmail.search_emails",
+        "args": {
+          "query": "Dana sync notes",
+          "after": "2026-01-01 00:00:00-04:00",
+          "before": null
+        },
+        "result_count": 1,
+        "evidence_ids": [
+          "mail_sync_dana"
+        ]
+      },
+      {
+        "tool": "calendar.search_events",
+        "args": {
+          "query": "sync notes",
+          "time_min": "2026-01-01 00:00:00-04:00",
+          "time_max": null,
+          "attendee": "dana@example.com",
+          "include_cancelled": false
+        },
+        "result_count": 0,
+        "evidence_ids": []
+      }
+    ],
+    "passed": false,
+    "failure_reason": "missing expected evidence ids: ['evt_standup_30']",
+    "root_cause": "ambiguous_contacts"
+  }
+}
